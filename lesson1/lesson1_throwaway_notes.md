@@ -68,6 +68,9 @@ This course will cover some language specific aspects of the Ruby programming la
 * `Object#instance_of?`
 * `Object#kind_of?` / `Object#is_a?`
 * `Object#respond_to?`
+* `simplecov` - code coverage analysis tool
+* `require 'simplecov'`
+* `Simplecov.start`
 
 ### Structure
 
@@ -98,7 +101,17 @@ Lesson 2:
 * 2.5: SEAT Approach: setup objects, execute against object, assert execution did what it was supposed to, teardown
 * 2.6: Testing Equality: `assert_equal` uses `==`, so `==` must be defined for the class to use it; `assert_same` uses `equal?`
 * 2.7: Write a test suite for TodoList: coding
-* 
+* 2.8: Code Coverage: code coverage explained, `simplecov` gem
+
+
+
+<u>Exercises</u>
+
+Easy 1:
+
+1. Enumerable Class Creation: covers `each` rule for Enumerable, nothing new
+
+
 
 
 
@@ -918,3 +931,14 @@ This code is added to your test module.
 
 When we use `assert_equal`, we are testing for *value equality*. Specifically, we're invoking the `==` method on the object. If we're looking for more strict *object equality*, then we need to use the `assert_same` assertion.
 
+
+
+<u>2.8: Code Coverage</u>
+
+Code coverage is the amount of the program code that is tested by a test suite.
+
+One metric is that if we have tested every public method of a class, then we declare that to be 100% coverage.
+
+There are other metrics. More sophisticated tools allow us to declare testing every branch in the program 100% coverage.
+
+One code coverage tool is `simplecov`.
