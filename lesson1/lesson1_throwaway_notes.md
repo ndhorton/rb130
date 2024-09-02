@@ -52,6 +52,22 @@ This course will cover some language specific aspects of the Ruby programming la
 * `assert_raises(*exp) { ... }` - fails unless block raises one of `*exp``
 * ``assert_instance_of(cls, obj)` - fails unless `obj` is an instance of `cls`
 * `assert_includes(collection, obj)` - fails unless collection includes `obj`
+* `assert_in_delta(exp, act, delta=0.001, message="")` - checks whether `(exp - act).abs <= delta`
+* `assert_in_epsilon` - checks whether `exp` differs from `act` by less than or equal to `[exp.abs, act.abs].min * epsilon`
+* `assert_same` - checks for object identity
+* `assert_silent` - fails if operation in block being tested produces any output to stdout or stderr
+* `assert_output` - checks both stdout and stderr against arguments, string, regex or `nil`
+* `capture_io` - captures output of operation in given bloc, returns array of two strings, first element stdout capture, second stderr, which can be asserted against multiple times if necessary
+* `refute` - logical opposite of `assert`, fails if truthy, succeeds if falsy
+* `assert_match` - checks a string against a regex
+* `assert_kind_of`
+* `assert_respond_to`
+* `assert_instance_of`
+* `ruby [file] --seed` - run a test suite file with a specific order (determined by seed)
+* `setup` and `teardown` - defining these methods for a test suite class means `setup` will be run before each test case and `teardown` after each test case
+* `Object#instance_of?`
+* `Object#kind_of?` / `Object#is_a?`
+* `Object#respond_to?`
 
 ### Structure
 
@@ -78,7 +94,11 @@ Lesson 2:
 * 2.1: Introduction: includes some jargon that is not explained. This lesson is an introduction to unit testing only.
 * 2.2: Setting up Minitest: installing the minitest bundled gem
 * 2.3: Lecture: Minitest: vocab, tests, results, failures, skip, reporters gem, assertions, expectations, expectation matches, assert-style vs expectation-style or spec-style
-* 2.4: Assertions: list of assertions, `Minitest::Assertions`
+* 2.4: Assertions: list of assertions, `Minitest::Assertions`, contains link to Medium article which goes into much more depth
+* 2.5: SEAT Approach: setup objects, execute against object, assert execution did what it was supposed to, teardown
+* 2.6: Testing Equality: `assert_equal` uses `==`, so `==` must be defined for the class to use it; `assert_same` uses `equal?`
+* 2.7: Write a test suite for TodoList: coding
+* 
 
 
 
@@ -609,4 +629,292 @@ Refutations are the opposite of assertions. that is, they *refute* rather than *
 
 One of the biggest keys to producing quality software is properly testing your program under a wide variety of conditions. Doing this manually is tedious and error-prone, and frequently doesn't get done at all. This leads to buggy software,  and sometimes software that doesn't work at all.
 
-Fortunately, modern programming environments support automated tests. Such tests can be run easily and often. It's possible to run them automatically before every commit or release.
+Fortunately, modern programming environments support automated tests. Such tests can be run easily and often. It's possible to run them automatically before every commit or release. While automated testing doesn't guarantee that your code will be bug free - the tests are only as good as you make them - it can certainly reduce the number of bugs your users will encounter. Automated testing can also help you find and fix bugs earlier in the development cycle, and prevent a lot of needless debugging trying to track down a particularly nasty bug.
+
+Minitest is the standard software testing framework provided with Ruby. It isn't the only software testing framework available, but being supplied automatically with Ruby is a major advantage.
+
+Problems that automated testing solves and benefits:
+
+* Manual testing is tedious and error-prone. It often doesn't get done. This leads to buggy software.
+* Automated tests can be run easily and often. They can be run automatically at important moments in development: commits, releases etc.
+* Automated tests may not eliminate bugs but they will certainly reduce them
+* Automated tests can help you find and fix bugs earlier in the development cycle
+* Automated tests can help avoid the most difficult debugging scenarios
+* Modern programming environments typically include testing frameworks allowing us to write and configure suites of automated tests with minimal difficulty
+
+<u>Definitions</u>
+
+A **testing framework** is software that provides a way to test each of the components of an application. These components might be as small as methods or as big as entire programs. The framework should be able to provide appropriate inputs, check return values, examine outputs, and even determine if errors occur when they should.
+
+Testing frameworks provide 3 basic features:
+
+* a way to describe the tests you want to run
+* a way to execute those tests
+* a way to report the results of those tests
+
+There is a hierarchy to tests. There is no formal agreement on terms to describe this hierarchy so we will use the following:
+
+* **test step**, or simply a **test** - the most basic level of testing. A test step simply verifies that a certain expectation has been satisfied. Test steps employ either an assertion or an expectation depending on your testing framework
+* **test case** - a set of actions that need to be tested combined with any appropriate test steps. Typically, only one test step is used per test case; some developers insist on this, others are more flexible.
+* **test suite** - a collection of one or more test cases that, taken together, demonstrate whether a particular application facet is operating correctly. Can be used to describe any grouping of test cases, testing anything from part of a class to an entire program. The test suite might be one file or many.
+
+Minitest is not quite as powerful and flexible as RSpec, but for most cases, Minites will do everything you need.
+
+In addition to being a testing framework, Minitest provides the ability to create **mock objects** and **stubs**, and the ability to run **benchmarks**.
+
+<u>Assertions or Expectations?</u>
+
+Minitest provides assertion-based and expectation-based interfaces.
+
+In the assertions-based interface, the test writer supplies one or more classes that represent test suites. Within each test suite are one or more methods that define test cases. Each test case method has some code that exercises some aspect of the item under test and then runs one or more test steps to verify the results.
+
+In the expectations-based interface, the test writer uses a domain-specific language, or DSL, to describe the tests.
+
+
+
+The difference between `assert_in_delta` and `assert_in_epsilon` seems to be as follows
+
+`assert_in_delta(exp, act, delta)` tests whether `(exp - act).abs <= delta`.
+
+`assert_in_epsilon(exp, act, epsilon)` is equivalent to
+
+```ruby
+assert_in_delta(exp, act, [exp.abs, act.abs].min * epsilon)
+```
+
+Both are used for test steps involving floats as a way to deal with floating-point rounding errors. `assert_in_delta` is way more common because easier to understand at a glance and `assert_in_epsilon` appears to be implemented in terms of `assert_in_delta`
+
+
+
+The expectations-style has a DSL that is more English-like but that still needs to be learned even if you speak English. The assertions-style is just Ruby with naming conventions and libraries of assertions methods and testing classes for your test suites to inherit from. The syntax is regular Ruby.
+
+<u>Writing a simple test suite</u>
+
+Typically, test suits are stored in a special `tests` directory beneath your main application's development directory. For example, if you are working on a to-do application that is stored in `/users/me/todo` then you will place the test suite files in `/users/me/todo/tests`. This is not a requirement but good practice for source organization, particularly when working with large projects.
+
+A common file-naming convention is to name a test-suite file for a class named `Todo` as either `t_todo.rb` or `todo_test.rb`
+
+We need to set up some scaffolding code for the tests, `require` the necessary modules, `require_relative` the code files to be tested, and establish a test-suite class that inherits from the right Minitest class, e.g. `Minitest::Test`
+
+* Test suite classes can be named anything but usually have the name of the component being tested along with `Test` either preceding or following it. These classes must inherit from `Minitest::Test` (for now) and this means they will be run
+* There can be as many test suite classes as we like in a test suite file and all will be run
+* Test case methods must have a name staring with `test_` in order for Minitest to know to run them
+* A test suite class may have one or many test case methods
+
+
+
+<u>Writing tests</u>
+
+It's important to understand how testing fits into the software development cycle. Ideally, your test cases should be run before writing any code. This is frequently called **Test-Driven Development (TDD)**, and follows a simple pattern:
+
+1. Create a test that fails.
+2. Write just enough code to implement the change or new feature.
+3. Refactor and improve things, then repeat tests.
+
+This is often called '**Red-Green-Refactor**'. Red describes the failure step; green describes the getting things working; and, of course, refactor covers refactoring and improving things.
+
+Once you've been through these steps, you can move on to the next feature and repeat all these steps.
+
+We name the component in the test first -- we are describing the interface of our class, method, module, etc through tests.
+
+The order that Minitest runs tests is randomized. If tests only fail when run in a particular order, we can note the seed number and then run the tests in the same order by passing the `--seed [number]` flag to Ruby on the command line.
+
+
+
+If you absolutely, positively need to always execute things in order, you must name all your test methods in alphabetical order, and include the command:
+
+```ruby
+i_suck_and_my_tests_are_order_dependent!
+```
+
+As you might surmise, the developers of Minitest feel very strongly about this. Don't do it!
+
+<u>Simple assertions</u>
+
+The failure message for simple `assert` is cryptic. Therefore, this method and simple `refute` are the only assertion methods that people tend to write a more detailed message for the optional `message` parameter.
+
+All refutations and almost all assertions allow an optional message as the final argument passed to the method. However, in most cases, the default message fore methods other than `#asser` and `#refute` is good enough to not require a specific message.
+
+The following assertions do not accept a message argument:
+
+* `assert_mock`
+* `assert_raises`
+* `assert_silent`
+
+Typically, `#assert` is use with methods that return `true` or `false`:
+
+```ruby
+assert(list.empty?, 'The list is not empty as expected.')
+```
+
+More often, `assert` just isn't used. Instead, people use `assert_equal` with an explicit `true` or `false` expected argument.
+
+`assert_equal` - the most frequently used assertion. This method uses `==` to check the equivalence of expected and actual value. This means that if the actual value is a complex object, the `==` operator method must be defined in the class or `BasicObject#==` will be used, which is almost always not what you want.
+
+You must be careful when using `assert_equal` to test for boolean values:
+
+```ruby
+assert_equal(true, xyzzy.method1)
+assert_equal(false, xyzzy.method2)
+```
+
+The first of these assertions only passes if the object returned by the method is actually the object `true`. Unlike `assert`, `assert_equal` is testing for the actual object `true`, not for truthiness. The same goes if we test against `false` as on the second line: `nil` will not count and the test will fail.
+
+
+
+`assert_same` - checks whether the two object arguments are the exact same object. This is most useful when you need to verify that a method returns the exact object it was passed as argument.
+
+```ruby
+assert_same(ary, ary.sort!)
+```
+
+This assertion uses the `equal?` method (which should not be overridden, so should be `BasicObject#equal?`) in order to check for identity between the arguments.
+
+
+
+`assert_nil` - most useful in conjunction with methods that return `nil` as a "no results" result
+
+`assert_empty` - checks whether an object returns `true` when `empty?` is called on the object. If the object does not respond to `empty?` or it returns a value other than `true`, the test fails. `assert_empty` is most useful with collections and strings.
+
+`assert_includes(collection, object)` - checks whether a collection includes a specific object. If the collection does not respond to `include?` or if the method returns a value other than `true`, the test fails.
+
+`assert_match(regex, actual string)` - checks whether a String is a regex match for a regex argument
+
+
+
+<u>Setup and Teardown</u>
+
+`setup` and `teardown` - defining these methods for a test suite class means `setup` will be run before each test case and `teardown` after each test case. It is common to initialize instance variables in `setup` that can be used in the test cases and in `teardown`
+
+`setup` and `teardown` are both optional and independent. You can define one but not the other if need be.
+
+<u>Testing Error Handling (`assert_raises`</u>)
+
+```ruby
+def test_with_negative_number
+  assert_raises(Math::DomainError) { square_root(-3) }
+end
+```
+
+Here, `#assert_raises` asserts that the associated block (`{ square_root(-3) }`) should raise a `Math::DomainError` exception, or an exception that subclasses `Math::DomainError`. If no exception is raised, or a different exception is raised, `assert_raises` fails and issues an appropriate failure message.
+
+<u>Testing Output</u>
+
+`assert_silent` - takes a block, fails if the operation in the block produces any output to stdout or stderr
+
+`assert_output` - takes a block and two arguments, which can be regex, string, or `nil`.  The first argument is checked against stdout, the second against stderr. If a string is used, the output must match exactly. If an empty string is passed, it means we assert that no output is produced to that stream. If `nil` is passed, it signifies that we do not care what output is produced to that stream. Succeeds if the operation in the block produces the correct output to both stdout and stderr, fails otherwise.
+
+`capture_io` - an alternative to using `assert_output` is to use `capture_io`.
+
+```ruby
+def test_stdout_and_stderr
+  out, err = capture_io do
+    print_all_records
+  end
+  
+  assert_equal('', out)
+  assert_equal(/No records found/, err)
+end
+```
+
+This lets us run multiple asserts on the output from stderr and/or stdout if we wish.
+
+<u>Testing Classes and Objects</u>
+
+`assert_instance_of` - asserts that an object is an object of a particular class
+
+`assert_kind_of` - asserts that an object is an object of a particular class or one of its subclasses. Analogous to `kind_of?` or `is_a?`
+
+`assert_respond_to` - In Ruby, you often don't need to know that an object has a particular type; instead,you're more interested in what methods an object responds to. Tests its interface. Analogous to `respond_to?`.
+
+<u>Refutations</u>
+
+Occasionally, we are interested not in affirming that a condition is true but affirming its negation. For instance, if you want to ensure that a method that operates on an Array returns a new `Array` instead of modifying the original `Array`, you need to assert that result `Array` is not the same object as the original `Array`. You can write this as:
+
+```ruby
+ary = [...]
+assert ary.object_id != method(ary).object_id, 'method(ary) returns original array'
+```
+
+This is difficult to read and understand, especially because we are forced to use `assert` rather than one of the more specialized assertions. For these cases, Minitest provides refutations. Refutations are assertions that assert that something is not true. For example, the above can become:
+
+```ruby
+ary = [...]
+refute ary.object_id == method(ary).object_id, 'method(ary) returns copy of original array'
+```
+
+This simplifies further to:
+
+```ruby
+ary = [...]
+refute_equal ary.object_id, method(ary).object_id
+```
+
+And further to:
+
+```ruby
+ary = [...]
+refute_same ary, method(ary)
+```
+
+Most Minitest assertions have equivalent refutations that test the negation of the condition. In all cases, the refutation uses the assertion name with `assert` replaced by `refute`, and arguments for refutation are identical to the arguments for assertions.
+
+The following assertions do not have a corresponding refutation:
+
+* `assert_output`
+* `assert_raises`
+* `assert_send`
+* `assert_silent`
+* `assert_throws`
+
+<u>Uncovered Methods</u>
+
+* `assert_in_epsilon`
+* `assert_operator` - is used to test binary operation such as `#<=`, `#+`, etc
+* `assert_predicate` - used to test predicates -- usually used by expectations, not assertions
+* `assert_send` - calls an arbitrary method on an object and asserts that the return value is true
+* `assert_throws` - tests whether a block returns via a `throw` to a specific symbol
+* `capture_subprocess_io` - similar to `capture_io` except that it also captures output of subprocesses. If `capture_io` doesn't do what you want, try `capture_subprocess_io` instead.
+* `flunk` - forces a test to fail
+* `skip` - forces a test to be skipped
+* `skipped?` - returns true if a test was skipped. Sometimes useful in `teardown`
+
+<u>Testing Startup Code</u>
+
+If a code file with components you are testing also contains startup code for your application, something like `Xyzzy.new.run`, the output may be confusing because the program will start in addition to being tested. To avoid this, you need to modify the launch code so it doesn't run when the file is required. You can do this like so:
+
+```ruby
+Xyzzy.new.run if __FILE__ == $PROGRAM_NAME
+```
+
+or
+
+```ruby
+Xyzzy.new.run if __FILE__ == $0
+```
+
+If you run the program directly, both `__FILE__` and `$PROGRAM_NAME` (or `$0`) reference the program file. If, instead, you require the file into your test module, `$PROGRAM_NAME` and `$0` will be the name of the test program, but `__FILE__` will continue to refer to the main program file; since the two names differ, the launch code will not run.
+
+Some programs don't have any obvious launch code like the above. Sinatra applications don't have any obvious launch code. In such cases, you may need to find a different way to prevent running the program when testing. With Sinatra (and Rack::Test), you must run the following before performing any route requests:
+
+```ruby
+ENV['RACK_ENV'] = 'test'
+```
+
+This code is added to your test module.
+
+
+
+<u>2.5:SEAT Approach</u>
+
+1. Set up the necessary objects.
+2. Execute the code against the object we're testing.
+3. Assert that the executed code did the right thing.
+4. Tear down and clean up any lingering artifacts.
+
+
+
+<u>2.6: Testing Equality</u>
+
+When we use `assert_equal`, we are testing for *value equality*. Specifically, we're invoking the `==` method on the object. If we're looking for more strict *object equality*, then we need to use the `assert_same` assertion.
+
