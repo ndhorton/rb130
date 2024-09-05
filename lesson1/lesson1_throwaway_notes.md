@@ -109,9 +109,27 @@ Lesson 2:
 
 Easy 1:
 
-1. Enumerable Class Creation: covers `each` rule for Enumerable, nothing new
+3: Find Missing Numbers: good stuff on `each_cons` vs `each_slice`
 
+Most of the rest of the exercises focus on implementing Enumerable methods. Good observations about `none?`, `any?` etc
 
+10: Count Items: recursive solution by Ethan Weiner in the student solutions is a really good pattern for recursive iteration over an array
+
+```ruby
+def count(array, &block)
+  return 0 if array.empty?
+  total = count(array[1..-1], &block)
+  yield(array[0]) ? total + 1 : total + 0
+end
+```
+
+Easy 2:
+
+Implementing more standard iterator methods
+
+Easy testing:
+
+1: some reinforcement of ideas about Boolean assertions
 
 
 

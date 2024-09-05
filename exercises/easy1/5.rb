@@ -105,10 +105,6 @@ def ebdic_rot13(text)
   end
 end
 
-# (('a'..'z').to_a + ('A'..'Z').to_a).each do |char|
-#   p "#{char}: #{decipher_ebcdic_char(char)}"
-# end
-
 names = [
   'Nqn Ybirynpr',
   'Tenpr Ubccre',
@@ -131,5 +127,5 @@ names = [
   'Tregehqr Oynapu'
 ]
 
-# names.each { |name| puts rot13(name) }
+names.each { |name| puts ebdic_rot13(name) }
 
