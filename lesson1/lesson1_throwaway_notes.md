@@ -71,6 +71,13 @@ This course will cover some language specific aspects of the Ruby programming la
 * `simplecov` - code coverage analysis tool
 * `require 'simplecov'`
 * `Simplecov.start`
+* `Proc.new`
+* `Kernel#proc`
+* `->`
+* `Kernel#lamda`
+* `Object#method(sym)` - returns a `Method` object with the caller as `self`
+* `Method#to_proc`
+* 
 
 ### Structure
 
@@ -131,9 +138,40 @@ Easy testing:
 
 1: some reinforcement of ideas about Boolean assertions
 
+2: for `assert_equal`, it's important to have the expected argument first and the actual second so that the failure message makes sense
+
+4: use `assert_empty` rather than `assert_equal true, list.empty?` because `assert_empty` is clearer and has a better failure message
+
+rest of exercises offers similar advice for the various assertions
+
+Medium 1:
+
+2: Text Analyzer: offers advice about files and sandwich code
+
+4: Passing Parameters Part 2: thought-provoking stuff on arity and the splat operator.
+
+* Multiple assignment has lenient arity
+* Blocks and ordinary procs have lenient arity
+* Methods have strict arity
+* Lambdas have strict arity
+
+5: Passing Parameters Part 3: even more interesting stuff about the splat operator
+
+When yielded to a block, an array's individual elements will get converted to a list of items if the block parameters call for that conversion (such as when we have parameters like `|apples, *assorted|`)
+
+When passing an array to a method [or presumably a lambda], we need to be explicit in how we pass it. If we want to change that array into a list of items, we'll have to do so with the splat operator `*`. 
+
+6: Method to Proc: introduces the concept of `Method` objects. A clear succinct explanation of unary `&`.
+
+Introduces `Method#to_proc` and `Object#method`.
 
 
-Lesson 1.2:
+
+
+
+
+
+<u>Lesson 1.2</u>
 
 A **closure** is a general programming concept. A closure allows programmers to save a “chunk of code” and execute it at a later time. It is called a closure because it’s said to bind its surrounding artifacts (names like variables and methods) and build an “enclosure” around everything so that they can be referenced when the closure is later executed. It can be useful to think of a closure as a method that you can pass around and execute, but it’s not defined with an explicit name. Different programming languages implement closures in different ways. Some languages will have first-class support for it, while other languages won’t deal with it at all.
 
