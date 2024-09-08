@@ -77,7 +77,16 @@ This course will cover some language specific aspects of the Ruby programming la
 * `Kernel#lamda`
 * `Object#method(sym)` - returns a `Method` object with the caller as `self`
 * `Method#to_proc`
-* 
+* `StringIO` - encapsulates a string as a 'string stream' (needs to be `require`d when in `irb` but not normally (`require 'stringio'`))
+* `StringIO#puts`
+* `StringIO#gets`
+* `File.open`
+* `File#read`
+* `File#close`
+* `File#closed?` - predicate method, returns `true` if file object has been closed (resources freed)
+* `Enumerator::new`
+* `Enumerator::Yielder#yield`
+* `Enumerator::Yielder#<<`
 
 ### Structure
 
@@ -165,11 +174,33 @@ When passing an array to a method [or presumably a lambda], we need to be explic
 
 Introduces `Method#to_proc` and `Object#method`.
 
+Medium 2: Testing
 
+By minitest convention, we name the test suite class `[name of class we wish to test]Test`.
 
+When setting up an expected value for `assert_output`, we need to remember little details such as the `\n` character that `puts` adds at the end of the string.
 
+6: Test Prompt For Payment Method - Transaction
 
+Includes information about `$stdin` standard input stream. Also introduces the word 'mock': "It would be nice if we could 'mock' the keyboard input"
 
+`StringIO`
+
+10: information on file handles and closing them
+
+Basically, Ruby will automatically close file objects when they are destructed and certainly when the program ends. The `IO` class has a failsafe to ensure this (some kind of destructor). However, it is still good practice to close files when they are not needed. Presumably in some programs which might run for a long time, you could still run into problems if you just keep opening files and never closing them.
+
+Advanced:
+
+1:  Internal vs External Iterators
+
+Introduces Enumerator objects.
+
+Whenever we use `map` or `each` on something like an Array, we're using something called "Internal Iteration". It's called that because the process and implementation of that iteration is hidden from us, and the process that allows us to progress through a collection is part of that hidden implementation.
+
+There is also "External Iteration". This is iteration that takes place at the behest of the user. Ruby gives us the option to use this type of iteration with the `Enumerator` class.
+
+2: information on blocks, procs and lambdas
 
 <u>Lesson 1.2</u>
 
