@@ -1029,3 +1029,121 @@ One metric is that if we have tested every public method of a class, then we dec
 There are other metrics. More sophisticated tools allow us to declare testing every branch in the program 100% coverage.
 
 One code coverage tool is `simplecov`.
+
+
+
+<u>Lesson 2: Summary</u>
+
+
+
+* Minitest is Ruby's default testing library. It comes installed with Ruby.
+* Minitest tests come in 2 flavors: assert-style and spec-style. Unless you really like RSpec, use assert-style.
+* A test suite contains many tests. A test can contain many assertions.
+* Use `assert_equal` liberally, but don't be afraid to look up other assertions when necessary. Remember that `assert_equal` is for asserting value equality as determined by the `==` method.
+* Use the SEAT approach to writing tests.
+* Use code coverage as a metric to gauge test quality. (But not the only metric.)
+* Practice writing tests -- it's easy!
+
+
+
+<u>Lesson 2: Quiz</u>
+
+Question 1 has useful definitions of types of testing. (Regression tests is the one we need for assessment I assume)
+
+Question 2 has useful formal definitions of assertion, test suite, and test
+
+Question 3 says RSpec is not installed with Ruby and is a DSL
+
+Questions 4 and 5 give brief summaries of SEAT steps
+
+Question 6 stresses that Set Up and Teardown steps reduce redundancy. This was confusing to me since I thought that Set Up steps were necessary in most tests whether you extract that code to the `setup` method or have to manually craft a test-specific object within the test method itself for a specific test.
+
+Question 7. `assert_equal` uses the `==` method for equivalence
+
+Questions 9-14 contain info in answers on rationale for using different assertions
+
+Question 15: code coverage details
+
+Should probably write some failing tests involving the most common assertions and refutations in order to get familiar with failure messages.
+
+
+
+<u>Lesson 2: Challanges</u>
+
+Links to Challenge FAQ which links to videos on problem solving for more serious small problems like the challenges.
+
+Video 1: up to 0:36:11
+
+<u>Small Code Challenge Problems</u>
+
+* 20-45 minutes
+* typical solutions: 10-40 Lines Of Code (LOC)
+* used extensively in interview for a reason
+  * mastery on a language
+  * logic / resoning
+  * communications
+
+
+
+<u>Understand the Problem</u>
+
+* requirements are explicit
+
+  * take notes
+
+* requirements are not so explicit and need to be modeled
+
+  * requirements are showed with examples
+    * examples need to be described in computational words
+
+  * implicit knowledge needs to be captured
+
+    * need to validate input?
+
+    * convert to explicit rules, in computational language
+
+  * identifying and defining important terms and concepts
+
+  * ask questions to verify your understanding!
+
+
+
+<u>Examples / Test Cases</u>
+
+* Input / Output
+* Test cases serve two purposes:
+  * help you understand the problem
+  * allow you to verify your solution
+* Happy paths
+  * combination of requirements; the "obvious" result
+* Edge cases
+  * focus on input
+  * emptiness (`nil`/`null`, `""`, `[]`, `{}`)
+  * boundary conditions
+  * repetition / duplication
+  * for strings: uppercase and lowercase
+  * data types
+* Failures / Bad Input
+  * raise exceptions / report errors
+  * return a special value (`nil` / `null`, `0`, `""`, `[]`, etc)
+* Ask questions to verify your understanding
+
+
+
+
+
+<u>Lesson 2: Question: code coverage 41%</u>
+
+The reason for the student's problem was that you need to `require 'simplecov'` before you `require 'minitest/autorun'`
+
+Pete Hanson: 
+
+"I'm not familiar with the inner workings of Simplecov, but the simplest explanation for "why" you need to require it very early in your test file is that Simplecov somehow needs to determine how many times each line in your code gets executed. The easiest way to do that is to replace the `require` method with its own version and handle loading files on its own - as each line of code gets read from the required files, Simplecov can instrument it before sending it to Ruby for parsing and execution. Most likely that instrumentation is in the form of a "wrapper" that increments a counter and then executes the code...
+
+"The first thing that must happen before any other useful code gets run is that Simplecov must get loaded so it can replace `require` with its own version. If Simplecov gets loaded too late, then a bunch of code doesn't get instrumented."
+
+
+
+<u>Lesson 2: Question: `$stdin`? `StringIO`?</u>
+
+Pete Hanson on input/output streams: "[An input stream] is just a fancy way of saying 'this is where we're getting input from'. It can be the keyboard, a file, some other sort of input device, or even a string that contains what we want."
