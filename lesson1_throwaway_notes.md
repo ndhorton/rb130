@@ -1450,3 +1450,40 @@ While you can always opt-out of using Rake in your projects, there is little poi
 
 Importantly, you want to make sure these tasks are performed in a set order, which could be a source of errors if they are not automated with Rake.
 
+
+
+Back to Lesson 3
+
+
+
+<u>3.3: Setting Up the Project Directory</u>
+
+Only use word characters for project directory names (letters, digits, underscore) since some tools can have difficulty with other characters. Avoid spaces especially.
+
+Make sure none of the parent directories are git repositories since git repos cannot be nested.
+
+Create project directory according to above.
+
+Initialize git repo in directory.
+
+Create github repo.
+
+```
+echo "# todolist_project" >> README.md
+git init
+git add README.md
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://[pgp key]@github.com/ndhorton/[repo name].git
+git push -u origin main
+```
+
+Typically, Ruby projects have a strict organization. Specifically test code should go in a `test` directory and Ruby source files go in `lib`.
+
+There is often an `assets` directory which may house images, JavaScript files, CSS, and so on, with subdirectories like `images`, `javascript`, and `stylesheets`.
+
+There is often an HTML "template" files directory called `views`.
+
+
+
+<u>3.4: Setting up the Gemfile</u>
