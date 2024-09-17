@@ -87,6 +87,15 @@ This course will cover some language specific aspects of the Ruby programming la
 * `Enumerator::new`
 * `Enumerator::Yielder#yield`
 * `Enumerator::Yielder#<<`
+* `RegExp#=~`
+* ``RegExp#match`
+* `RegExp#match?`
+* `String#match`
+* `String#match?`
+* `String#=~`
+* `String#scan`
+* `String#sub`
+* `String#gsub`
 
 ### Structure
 
@@ -1072,7 +1081,7 @@ Should probably write some failing tests involving the most common assertions an
 
 Links to Challenge FAQ which links to videos on problem solving for more serious small problems like the challenges.
 
-Video 1: up to 0:36:11
+<u>Video 1: Understanding the Requirements and Generating Examples/Test Cases</u> 
 
 <u>Small Code Challenge Problems</u>
 
@@ -1130,6 +1139,103 @@ Video 1: up to 0:36:11
 
 
 
+After you have made notes, made the implicit explicit, you can ask the interviewer: "this is the problem as I see it, etc... Is that correct?". And for the test cases also if they give further light on the problem.
+
+Your conditional branching logic has to come from Understanding the Problem. It has to come from implicit or explicit requirements. So if you do the Understanding the Problem part well, it should give you the skeleton of your solution.
+
+When you are working on a project or application, the goal is to break it down into small problems, so the same process then applies to the multitude of small problems. Of course, you have to derive the requirements from this process of analyzing the larger app/project into its components. Then you need to make all the implicit requirements (that you may not have considered at the higher level) explicit. Then you need to design your own test cases and work through examples to cover edge cases. Then you can solve the problem in much the same way as a small coding challenge problem.
+
+I think one thing I'm doing wrong is not treating the P part of PEDAC as Understanding the Problem. It's more important to understand than it is to restate the problem as written (that's just part of it). The Examples/Test cases section of notes should be about working through test cases as given or coming up with your own, consider edge cases, unearth implicit requirements.
+
+
+
+<u>Video 2: Data Structures, Algorithms, and Abstractions</u> up to 00:18:13
+
+```terminal
+Data Structure
+  - input data
+  - rules/requirements as data
+    - hash / object
+
+  - string, array, hash/object, number
+    - string
+      - concat, strip, reverse, etc
+      - Regular Expression! split, replace, match...
+    - array
+      - need to walk through it (iteration)
+      - index
+      - abstractions!!
+        - map
+        - reduce
+        - select/filter
+        - all
+        - ...
+    - hash/object
+      - lookup table / dictionary
+      - partition data for more efficient access downstream
+      - digest
+    - number
+      - math operations
+      - number as string may have advantage over numbers
+  - compound data structures
+    - array of arrays
+    - hash with array/object values, etc
+
+Algorithm
+  - Algorithms have to be described in the language of chosen data structure!
+    - "then solve it" doesn't count
+  - Have to be really fluent with
+    - String / Regex
+    - Array
+      - Ruby: Enumerable
+      - JavaScript: Higher Order Functions
+    - Hash / Object
+      - Creation (default values)
+      - Access (default values)
+      - Iteration
+  - verify your algorithm with your examples / test cases
+
+Abstraction
+  - Very important, rely on language built in abstractions: String/Regex, Array, Hash/Object
+  - Avoid solving big problems!
+    - Always, always, break bigger problems into smaller problems
+    - Don't try to walk through a wall
+  - lay out the general steps of an algorithm, without having to go to details
+    - Try to solve a problem in 1-2 sentences!!!
+    - If you can't, raise your abstraction
+      - create helper methods/functions
+      - push detailed steps to methods/functions
+
+Interview Tips
+  - Communicative
+  - Getting to a working solution >> no solution
+  - De-risking
+    - Check your building blocks
+      - run code often
+      - debug locally
+  - Manage your energy
+```
+
+Picking the right data structure to represent your data can significantly reduce the complexity of your solution algorithm.
+
+As much as possible, simplify your pseudocode into the language of the data structure you are working with. This requires knowledge of the language you are working with and the library available for a given data structure. In Ruby, JS, Python, etc, there will be a lot of abstractions to use (`map`, `reverse`, etc). If you are having to demonstrate ground-up algorithmic knowledge, or you are writing in C, you will need more algorithm-book-pseudocode granular detail where only basic abstractions can be assumed (`for` loop, etc).
+
+Once you have understood the problem, try expressing a solution in 1 or 2 sentences. If you can't, raise your level of abstraction and divide it up into smaller problems.
+
+```
+overall solution:
+create results array
+for each index of original string
+  find all the consecutive substrings that begin at that index
+  save them into results array
+return results array
+
+to find all consecutive substrings begining at a starting index:
+results array = map index from range (starting_index to last index inclusive)
+  map function: slice string from starting_index to index inclusive
+return results array  
+```
+
 
 
 <u>Lesson 2: Question: code coverage 41%</u>
@@ -1147,3 +1253,200 @@ Pete Hanson:
 <u>Lesson 2: Question: `$stdin`? `StringIO`?</u>
 
 Pete Hanson on input/output streams: "[An input stream] is just a fancy way of saying 'this is where we're getting input from'. It can be the keyboard, a file, some other sort of input device, or even a string that contains what we want."
+
+
+
+<u>Regex Book</u>
+
+Character classes and character class shortcuts (`\d` and so on)
+
+Anchors: `\A`..`\z`, `^`...`$`, `\b`, also `\B` but much less used
+
+Quantifiers: `*+`, `{n}` matches exactly `n`, for range quantifiers `{n,}` matches `n` or more, `{n, m}` matches from `n` to `m` of the preceding pattern inclusive of `m`. Adding `?` to a quantifier makes it lazy rather than the default greedy
+
+`RegExp#=~`
+
+`RegExp#match`
+
+`RegExp#match?`
+
+`String#match`
+
+`String#match?`
+
+`String#=~`
+
+`String#scan`
+
+`String#sub`
+
+`String#gsub`
+
+Capture groups and backreferences:  each `()` in the regex is a new capture group labeled 1-9. We backreference a captured group with `\1`, `\2`, etc. Allows for things like this:
+
+`/(['"])\S+?\1`
+
+This will match either a `'` or a `"` followed by one or more non-whitespace chars followed by the *same* type of quote that began the quoted word. Mismatched quotes won't match. The `+` quantifier is made lazy by `?`.
+
+
+
+* **Patterns** are the primary building blocks of **regex**. You construct regex from patterns using **concatenation** and **alternation**. You then place the resulting pattern between two `/` characters.
+* Concatenation and alternation of two patterns create a new pattern.
+* The most basic patterns match a single character, a range of characters, or a set of characters.
+* We call some special characters **meta-characters**; they have special meaning inside a regex. When you must match one literally, **escape** it with a leading `\` character.
+* **Character class** patterns match any character in a set or range of characters or any combination of sets and ranges.
+* **Anchors** force a regex to match at a specific location inside a string.
+* A **quantifier** matches a pattern multiple times; they always apply to the pattern to the left of the quantifier. Quantifiers are **greedy** by default, but also have **lazy** forms.
+* Parentheses let you combine patterns as a series of alternates. They also provide a way to **capture** parts of a match for later reuse; when used this way, we call the groups **capture groups**. We can access captured values with **backreferences**.
+
+
+
+<u>Ruby Tools book</u>
+
+<u>Gems</u>
+
+in order to check which file was `require`d, you can check the `$LOADED_FEATURES` global variable after the `require` statement. You can filter it using `Enumerable#grep`:
+
+```ruby
+puts $LOADED_FEATURES.grep(/filename\.rb/)
+```
+
+This will give you the full path of the `filename.rb` loaded when `require 'filename'` was executed.
+
+
+
+NB: while messing around with `pry` and `pry-byebug`, I discovered that `binding.pry` won't trigger the `pry` console if it's the last line of code in a file and it's the only `binding.pry` used in the file (it will retrigger `pry` if there has already been a `binding.pry` previously in the file). This is a bug whose report has been open since 2014 so I don't see them fixing it.
+
+
+
+Has information on version conflicts. To use a particular version of a Gem:
+
+* Provide an absolute path name to `require`
+* Add appropriate `-I` option to the Ruby invocation on the command line
+* Modify `$LOAD_PATH` prior to requiring the gem
+* Modify the `RUBYLIB` environment variable.
+
+These fixes are all hacks though; they will quickly become unmanageable, an enormous mess, a source of bugs. The right choice is to use Bundler.
+
+`.ruby-version` file generated by navigating to project directory and running
+
+```
+rvm --ruby-version [version number/default etc]
+```
+
+<u>Bundler</u>
+
+Bundler, itself a RubyGem, is a **dependency manager** that lets you configure which Ruby and which Gems each of your projects needs.
+
+Bundler relies on a file named `Gemfile` to tell it which version of Ruby and its Gems it should use for a project. This file is a simple Ruby program that uses a Domain Specific Language (DSL) to provide details about the Ruby and Gem versions. It's the configuration or instruction file for Bundler.
+
+After you create `Gemfile`, the `bundle install` command scans it, downloads and installs all the dependencies listed, and produces a `Gemfile.lock` file. `Gemfile.lock` shows all the dependencies for your program; this includes all the Gems listed in `Gemfile`, as well as the Gems they depend on (the dependencies), which may not be explicitly listed in the `Gemfile`. It's very common for RubyGems you install for use in your project to rely on many other gems, creating a large dependency tree.
+
+Once Bundler creates your `Gemfile.lock`, add:
+
+```ruby
+require 'bundler/setup'
+```
+
+to the beginning of your app, before any other Gems. (This is unnecessary if your app is a Rails app).
+
+`bundler/setup` works by clearing the `$LOAD_PATH` global array and replacing its contents with the paths to the Gems listed in `Gemfile.lock`.
+
+You may see advice to add `require 'rubygems'` to your apps. This is unnecessary. This statement is a holdover from the days before RubyGems became an official part of Ruby; Ruby now provides this functionality automatically.
+
+There is a feature called `binstubs` in Bundler. Use of the feature involves adding directories to `$PATH`.
+
+If you cannot add `require 'bundler/setup'` to your app, which can happen for various reasons, you will need to use `bundle exec` command (or `binstubs`). You may encounter
+
+```
+Gem::LoadError: You have already activated ...
+```
+
+This can usually be rectified by using `bundle exec` to run the command.
+
+You can use `bundle exec` to run most any command in an environment that conforms to the `Gemfile.lock` versioning info.
+
+You may need to use `bundle exec` in conjunction with `irb`, `pry`, etc, and to resolve dependency issues when issuing shell commands. `bundle exec` alters your environment according to the `Gemfile.lock`. You can see this by comparing the output of `env` and `bundle exec env` at the command prompt.
+
+This can be especially useful in conjunction with `rake`. `rake` sometimes runs code that Bundler manages but isn't part of `rake`. When that code runs, it checks your `Gemfile.lock` and sees that it needs another version of `rake` than the one already running. Since you can't run two versions of `rake` in the same process, the `require` fails with a `LoadError`.
+
+All you have to do is run `rake` with `bundle exec`
+
+```
+bundle exec rake
+```
+
+This changes the environment to that the `Gemfile.lock` version of `rake` runs from the beginning of the process.
+
+Any Gem command that requires other Gems may load a Gem that conflicts with your app's requirements. `bundle exec` is the easiest way to fix this issue.
+
+`binstubs` can be used as an alternative to `bundle exec`.
+
+Sometimes you will see:
+
+```
+in `require': cannot load such file -- colorize (LoadError)
+```
+
+This means that `bundler/setup` couldn't find the named Gem, here `colorize`. If you've confirmed the Gem is installed, with the right permissions, you're using the proper version of Ruby and the `gem` command. the issue is that the `Gemfile.lock` file doesn't list the `colorize` Gem; `bundler/setup` insists that your `Gemfile.lock` contains all needed Gems. To add this Gem to yours, add it to your `Gemfile`, then run `bundle install` again to generate a new `Gemfile.lock` file.
+
+Lists more issues and fixes.
+
+
+
+<u>Rake</u>
+
+Rake is a RubyGem that automates many common functions required to build, test, package, and install programs; it is part of every modern Ruby installation.
+
+The Rake name alludes to the C/Unix tool Make, so Rake is Ruby Make.
+
+Rake allows us to
+
+* Set up required environment by creating directories and files
+* Set up and initialize databases
+* Run tests
+* Package your application and all of its files for distribution
+* Install the application
+* Perform common Git tasks
+* Rebuild certain files and directories (assets) based on changes to other files and directories
+
+You can write Rake tasks to automate anything you may want to do with your application during the development, testing, and release cycles.
+
+Rake uses a named `Rakefile` that lives in your project directory; this file describes the tasks that Rake can perform for your project, and how to perform those tasks. For instance, here is a very simple `Rakefile`:
+
+```ruby
+desc 'Say hello'
+task :hello do
+  puts "Hello there. This is the 'hello' task"
+end
+
+desc 'Say goodbye'
+task :bye do
+  puts 'Bye now!'
+end
+
+desc 'Do everything'
+task :default => [:hello, :bye]
+```
+
+The `'Do everything'`/`:default` task has the other two tasks as prerequisites or dependencies. The first two tasks are named `:hello` and `:bye` while the other task is the **default** task; Rake runs the default task if you do not provide a specific task name when you invoke Rake.
+
+Each of the above tasks calls two Rake methods: `desc` and `task`. The `desc` method provides a short description that Rake displays when you run `rake -T`. The `task` method associates a name with either a block of Ruby code or a list of dependencies.
+
+Here the `:default` task depends on the `:hello` and `:bye` tasks. When you run the `:default` task, Rake will run the `:hello` and `:bye` tasks first.
+
+The first thing you should do with any Rakefile (when installing someone else's software?) is to find out what tasks it can run. You do this with the `rake -T` command
+
+```
+bundle exec rake -T
+```
+
+While you can always opt-out of using Rake in your projects, there is little point to doing so. Every project that aims to produce a program other people will use has repetitive tasks the developer needs. For instance, to release a new version of an existing program, you may want to:
+
+* Run all tests associated with the program.
+* Increment the version number.
+* Create your release notes.
+* Make a complete backup of your local repo.
+
+Importantly, you want to make sure these tasks are performed in a set order, which could be a source of errors if they are not automated with Rake.
+
