@@ -96,6 +96,16 @@ This course will cover some language specific aspects of the Ruby programming la
 * `String#scan`
 * `String#sub`
 * `String#gsub`
+* `require 'bundler/setup'`
+* `require 'rake'`
+* `source` (Bundler DSL)
+* `ruby` (Bundler DSL)
+* `gem` (Bundler DSL)
+* `desc` (Rake DSL)
+* `task` (Rake DSL)
+* `sh` (Rake DSL)
+* `rake/testtask`
+* `Rake::TestTask.new`
 
 ### Structure
 
@@ -1450,6 +1460,8 @@ While you can always opt-out of using Rake in your projects, there is little poi
 
 Importantly, you want to make sure these tasks are performed in a set order, which could be a source of errors if they are not automated with Rake.
 
+It seems that `Rakefile` is the most common name for a Rakefile.
+
 
 
 Back to Lesson 3
@@ -1487,3 +1499,100 @@ There is often an HTML "template" files directory called `views`.
 
 
 <u>3.4: Setting up the Gemfile</u>
+
+Once you have set up your project directory, you're ready to configure Bundler.
+
+A `Gemfile` typically needs four main pieces of information:
+
+* Where should Bundler look for Rubygems it needs to install?
+* Do you need a `.gemspec` file?
+* What version of Ruby does your program need? (Recommended, not required)
+* What Rubygems does your program use?
+
+The first of these is typically easy: most projects find Rubygems at the official Rubygems site. You provide this information in your `Gemfile` with the `source` statement:
+
+```ruby
+source 'https://rubygems.org'
+```
+
+Next we would add the `.gemspec` file to the `Gemfile`, but we are skipping this for now. Bundler only looks for a `.gemspec` file if there is a `gemspec` statement in `Gemfile`.
+
+Next we add the Ruby version number with a `ruby` statement:
+
+```ruby
+ruby '[version number]'
+```
+
+Lastly, we add the gems our program needs with `gem` statements.
+
+To find the gems we need we first search our project directory for `require`  statements:
+
+```
+grep -drecurse "require '"
+```
+
+this gives us the names of `.rb` files. When we have something like `minitest/autorun`, we are searching for a file called `autorun.rb` whose directory is `minitest/`.
+
+I navigated to the `~/.rvm/gems/` directory and ran
+
+```
+find . -name "autorun.rb" | grep "minitest\/"
+```
+
+This brought up 
+
+```
+./ruby-3.2.2/gems/minitest-5.20.0/lib/minitest/autorun.rb
+./ruby-3.3.0/gems/minitest-5.25.1/lib/minitest/autorun.rb
+```
+
+The directory under `gems/` which is `minitest-5.25.1` tells us the name of the Gem, `minitest`, and the version number `5.25.1` and the directory above `gems/`, `ruby-3.3.0/` tells me the Ruby version I am using.
+
+```ruby
+gem 'minitest', '~> 5.25'
+```
+
+The Gem version syntax is the same as the Ruby version syntax.
+
+The `~>` notation tells Bundler that we want a version of at least `5.25`, but prior to version `6.0`. There are also greater-than and less-than syntaxes. You may be able to omit the version number, or be more or less specific about the version you want. The `~>` syntax is generally best for most cases. Consult Bundler docs for more information on specifying ranges of acceptable versions.
+
+If you add more Gems to your project with `require`, you must also add them to your `Gemfile` too. You must also run `bundle install` again.
+
+Note that the `Gemfile` is Ruby using a DSL supplied by Bundler.
+
+If you are using a version of Ruby you do not have installed, now is the time to install it, and then tell `RVM`/`rbenv` to use it as the current Ruby. You must then install the Bundler Gem for that version. Now we are ready to run Bundler.
+
+```
+bundle install
+```
+
+The Gems we list in our `Gemfile` each have their own `Gemfile` listing their Gem dependencies, so those will be installed too. This command also creates a `Gemfile.lock` file that contains all the dependency information for your app.
+
+The final step is to tell each Ruby program in our project to use Bundler. To do this add the following to all your main program files (including test files)
+
+```ruby
+require 'bundler/setup'
+```
+
+You must `require 'bundler/setup'` before any other `require` statements. It helps ensure that your `Gemfile` is complete. If you try to load a Gem that isn't in the `Gemfile`, `bundler/setup` prevents Ruby from finding the file.
+
+Note: we do not need to add Standard Library `require`s to our Gemfile. The Standard Library does not consist of Gems.
+
+<u>3.6: Setting Up the Rakefile</u>
+
+A `Rakefile` is just Ruby code that uses a DSL supplied by Rake. We define **tasks** in a `Rakefile`. We use Symbols to name tasks. `desc` attaches a description to a task which we see when we run `rake -T`.
+
+Since we are adding Rake to the project, we should, for good measure, add it to our `Gemfile`.
+
+You should use `bundle exec rake` whenever you use Rake with a project that uses Bundler.
+
+The `sh` command takes a string argument and runs the command given in the argument
+
+If you find that you run one particular task often, you can set it up as the default task.
+
+The best way to create a task that runs tests is to `require 'rake/testtask'` and instantiate a new `Rake::TestTask` object by calling `::new` with a suitable block. This strategy will automatically run any tests added to the `test/` folder.
+
+There are many more standard tasks that you can `require` into your `Rakefile`. See the Rake documentation link. Before writing any complex tasks, especially those that may need to automatically adapt to new files, check the list of available tasks you can include. You will also find Rake tasks available as part of other Gems or even as independent Gems.
+
+For instance, Bundler provides a `bundler/gem_tasks` module that defines some common tasks related to building Gems.
+
