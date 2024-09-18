@@ -106,6 +106,7 @@ This course will cover some language specific aspects of the Ruby programming la
 * `sh` (Rake DSL)
 * `rake/testtask`
 * `Rake::TestTask.new`
+* `require 'bundler/gem_tasks'`
 
 ### Structure
 
@@ -1595,4 +1596,42 @@ The best way to create a task that runs tests is to `require 'rake/testtask'` an
 There are many more standard tasks that you can `require` into your `Rakefile`. See the Rake documentation link. Before writing any complex tasks, especially those that may need to automatically adapt to new files, check the list of available tasks you can include. You will also find Rake tasks available as part of other Gems or even as independent Gems.
 
 For instance, Bundler provides a `bundler/gem_tasks` module that defines some common tasks related to building Gems.
+
+
+
+<u>3.7: Preparing a Rubygem</u>
+
+Most Ruby projects use Rubygems as the distribution mechanism. This requires that you observe certain practices when building your project. Specifically, you must use a common directory structure and you must supply a `.gemspec` file. Most Gems also include both a `Gemfile` and a `Rakefile`, but don't require them.
+
+You must put your Ruby code files in the `lib` directory and your tests in the `test` directory.
+
+* Read the documentation.
+* Prepare any additional directories that you need.
+* Prepare a `README.md` file.
+* Write documentation if necessary.
+* Prepare your `.gemspec` file. Note that the actual `.gemspec` file has a name like `project.gemspec`, where "project" is the name of your project.
+* Add a `gemspec` statement to your `Gemfile`.
+* Modify your `Rakefile` to include the standard Rubygem tasks.
+
+Add to the top of the Rakefile `require 'bundler/gem_tasks'`.
+
+The `bundler/gem_tasks` require file adds several tasks to your Rakefile that are common to Rubygems. Specifically, it defines these tasks:
+
+* `build`: constructs a `.gem` file in the `pkg` directory. This file contains the actual Rubygem that you will distribute.
+* `install`: runs `rake build` then installs the program in your Ruby's Gem directory. This way, you can test the Gem without having to load information from your project directory.
+* `release`: send your `.gem` file to the remote Rubygems library for the world to download.
+
+`bundler/gem_tasks` provides several additional tasks, but `build`, `install`, and `release` are the most important.
+
+
+
+<u>3.8: Summary</u>
+
+* Rubygems provide a library of code that you can download and run or use directly inside your Ruby programs. You use the `gem` command to manage the Gems you need.
+* Rubygems also provide the mechanisms you need to release your own Gems, which can either be packages of code you `require` into your Ruby programs, or independent Ruby programs that you can run (eg, the `bundle` program from the Bundler gem).
+* Ruby projects usually use the Rubygems format.
+* Ruby Version Managers help you  manage multiple versions of Ruby on a single system. Each Ruby version has its own set of tools such as the `gem` and `bundle` commands.
+* Bundler provides the tools you need to describe the dependencies for your Ruby programs. This makes it easy to distribute your program to other systems: bundler installs all the necessary components, and even ensures that the program uses the correct version of each Gem.
+* Rake provides a way to easily manage and run repetitive tasks that a developer needs when working on a project.
+* The `.gemspec` file provides information about a Gem. If you decide to release a program or library as a Gem, you must include a `.gemspec` file.
 
