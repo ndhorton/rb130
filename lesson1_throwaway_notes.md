@@ -1635,3 +1635,46 @@ The `bundler/gem_tasks` require file adds several tasks to your Rakefile that ar
 * Rake provides a way to easily manage and run repetitive tasks that a developer needs when working on a project.
 * The `.gemspec` file provides information about a Gem. If you decide to release a program or library as a Gem, you must include a `.gemspec` file.
 
+
+
+<u>Enumerator (from *The Well-Grounded Rubyist*)</u>
+
+Here is a simple example of the instantiation of an Enumerator object with a code block:
+
+```ruby
+e = Enumerator.new do |y|
+  y << 1
+  y << 2
+  y << 3
+end
+
+e.each { |el| puts el }
+# output:
+# 1
+# 2
+# 3
+```
+
+`y` in this scenario is an instance of `Enumerator::Yielder`. Yielder objects encapsulate the yielding scenario that you want your enumerator to follow.
+
+The `Enumerator::Yielder#<<` method and the (similar but not identical) `Enumerator::Yielder#yield` method are used to instruct the Yielder as to what it should yield. The `#yield` method is (obviously) a method, whereas the `yield` that is used in an iterator method to yield to the block is a keyword. The difference in functionality is simply that `#yield` always returns `nil` whereas `#<<` always returns `self` (the `Enumerator::Yielder` object on which it has been called).
+
+On being asked to iterate, the Enumerator object will consult its Yielder and make the next move -- the next yield -- based on the instructions that the yielder has stored.
+
+An Enumerator is an enumerating machine. It does not have a collection of values associated to it; rather, it has a code associated with it (here the original code block passed to the `::new` method) that tells it what to do when it's addressed in terms that it recognizes from the `Enumerable` module (or `#each` or `#next`, etc).
+
+The enumerator iterates once for every time that `<<` (or `#yield`) is called on the yielder. If you put calls to `<<` inside a loop, you can introduce just about any iteration logic you want.
+
+You do NOT do this:
+```ruby
+e = Enumerator.new do
+  yield 1	# BAD and WRONG!!!
+  yield 2 # STOP this!!!
+  yield 3 # NOOOOO!!!
+end
+```
+
+This would raise `SyntaxError` as an improper use of the `yield` keyword.
+
+Rather, you populate your yielder with specifications for how you want the iteration to proceed at such time as you call an internal or external iterative method on the enumerator.
+
