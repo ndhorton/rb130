@@ -1678,3 +1678,26 @@ This would raise `SyntaxError` as an improper use of the `yield` keyword.
 
 Rather, you populate your yielder with specifications for how you want the iteration to proceed at such time as you call an internal or external iterative method on the enumerator.
 
+Note that `reduce`/`inject` does not return an Enumerator when called without a block. However, it is still possible to do:
+
+```ruby
+enum = [1, 2, 3, 4, 5].enum_for(:reduce, 0)
+```
+
+to hook a new Enumerator up to `inject` on a given reciever.
+
+We can call `Enumerable#lazy` in order to return a lazy enumerator (an instance of `Enumerator::Lazy`). This will allow us to enumerate values on an as-needed basis, which is useful for operations on an infinite range, for instance. 
+
+Some methods called on a lazy enumerator will simply return a new lazy enumerator with the additional operation included in it for later use. We can cause such iterator methods to execute using `Enumerator::Lazy#force`.
+
+```ruby
+enum = (1...Float::INFINITY).lazy.select { |i| i % 3 == 0 }
+# => <Enumerator::Lazy:...>
+enum.take(10)
+# => <Enumerator::Lazy:...>
+enum.take(10).force
+# => [3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
+```
+
+
+
