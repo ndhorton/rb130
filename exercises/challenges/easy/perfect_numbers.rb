@@ -65,9 +65,7 @@ Return sum of elements in divisors
 class PerfectNumber
   class << self
     def classify(number)
-      if number <= 0
-        raise StandardError, 'must be positive integer'
-      end
+      raise StandardError, 'must be positive integer' if number <= 0
 
       sum = aliquot_sum(number)
       if sum == number
@@ -95,31 +93,32 @@ class PerfectNumber
 
       sum
     end
+  end
 end
 
 # 26:52
 
-class PerfectNumber
-  def self.classify(number)
-    raise StandardError.new if number < 1
-    sum = sum_of_factors(number)
+# class PerfectNumber
+#   def self.classify(number)
+#     raise StandardError.new if number < 1
+#     sum = sum_of_factors(number)
 
-    if sum == number
-      'perfect'
-    elsif sum > number
-      'abundant'
-    else
-      'deficient'
-    end
-  end
+#     if sum == number
+#       'perfect'
+#     elsif sum > number
+#       'abundant'
+#     else
+#       'deficient'
+#     end
+#   end
 
-  class << self
-    private
+#   class << self
+#     private
 
-    def sum_of_factors(number)
-      (1...number).select do |possible_divisor|
-        number % possible_divisor == 0
-      end.sum
-    end
-  end
-end
+#     def sum_of_factors(number)
+#       (1...number).select do |possible_divisor|
+#         number % possible_divisor == 0
+#       end.sum
+#     end
+#   end
+# end

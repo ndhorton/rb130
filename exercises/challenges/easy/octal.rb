@@ -54,54 +54,54 @@ else
   return false
 =end
 
-# class Octal
-#   def initialize(octal_string)
-#     @string = octal_string
-#   end
-
-#   def to_decimal
-#     return 0 unless string_valid?
-
-#     result = 0
-#     @string.to_i.digits.each_with_index do |digit, index|
-#       result += digit * (8 ** index)
-#     end
-
-#     result
-#   end
-
-#   private
-
-#   def string_valid?
-#     @string.match?(/\A[0-7]+\z/)
-#   end
-# end
-
-# 25:09
-
 class Octal
-  attr_reader :number
-
-  def initialize(str)
-    @number = str
+  def initialize(octal_string)
+    @string = octal_string
   end
 
   def to_decimal
-    return 0 unless valid_octal?(number)
+    return 0 unless string_valid?
 
-    arr_digits = number.to_i.digits
-
-    new_number = 0
-    arr_digits.each_with_index do |num, exponent|
-      new_number += (num * (8 ** exponent))
+    result = 0
+    @string.to_i.digits.each_with_index do |digit, index|
+      result += digit * (8**index)
     end
 
-    new_number
+    result
   end
 
   private
 
-  def valid_octal?(num)
-    num.chars.all? { |n| n =~ /[0-7]/ }
+  def string_valid?
+    @string.match?(/\A[0-7]+\z/)
   end
 end
+
+# 25:09
+
+# class Octal
+#   attr_reader :number
+
+#   def initialize(str)
+#     @number = str
+#   end
+
+#   def to_decimal
+#     return 0 unless valid_octal?(number)
+
+#     arr_digits = number.to_i.digits
+
+#     new_number = 0
+#     arr_digits.each_with_index do |num, exponent|
+#       new_number += (num * (8**exponent))
+#     end
+
+#     new_number
+#   end
+
+#   private
+
+#   def valid_octal?(num)
+#     num.chars.all? { |n| n =~ /[0-7]/ }
+#   end
+# end

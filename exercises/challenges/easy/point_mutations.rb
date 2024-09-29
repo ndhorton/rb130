@@ -8,7 +8,7 @@ Write a program that can calculate the Hamming distance between two DNA
 strands.
 
 The Hamming distance is the number of characters that are different at
-corresponding positions in two strings representing DNA. 
+corresponding positions in two strings representing DNA.
 
 The Hamming distance is only defined for sequences of equal length.
 If you have two sequences of different length, you should compute Hamming
@@ -53,43 +53,43 @@ Iterate for index from 0 upto not including target_length
 Return distance
 =end
 
-# class DNA
-#   attr_reader :strand
+class DNA
+  attr_reader :strand
 
-#   def initialize(strand)
-#     @strand = strand
-#   end
+  def initialize(strand)
+    @strand = strand
+  end
 
-#   def hamming_distance(other_strand)
-#     target_length = [strand.length, other_strand.length].min
-#     distance = 0
-    
-#     (0...target_length).each do |index|
-#       next if strand[index] == other_strand[index]
-#       distance += 1
-#     end
+  def hamming_distance(other_strand)
+    target_length = [strand.length, other_strand.length].min
+    distance = 0
 
-#     distance
-#   end
-# end
+    (0...target_length).each do |index|
+      next if strand[index] == other_strand[index]
+      distance += 1
+    end
+
+    distance
+  end
+end
 
 # 23:54
 
 # LS solution
 
-class DNA
-  def initialize(strand)
-    @strand = strand
-  end
+# class DNA
+#   def initialize(strand)
+#     @strand = strand
+#   end
 
-  def hamming_distance(comparison)
-    shorter = @strand.length < comparison.length ? @strand : comparison
-    differences = 0
+#   def hamming_distance(comparison)
+#     shorter = @strand.length < comparison.length ? @strand : comparison
+#     differences = 0
 
-    shorter.length.times do |index|
-      differences += 1 unless @strand[index] == comparison[index]
-    end
+#     shorter.length.times do |index|
+#       differences += 1 unless @strand[index] == comparison[index]
+#     end
 
-    differences
-  end
-end
+#     differences
+#   end
+# end

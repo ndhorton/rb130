@@ -21,8 +21,6 @@ a class-level array accessed with
 
 DS:
 
-
-
 class Robot
 needs some kind of class (instance?) variable and class methods
   such that we can keep a class-internal array of previous robot names
@@ -35,78 +33,78 @@ A:
 
 =end
 
-# class Robot
-#   DIGITS = ('0'..'9').to_a.freeze
-#   LETTERS = ('A'..'Z').to_a.freeze
-#   private_constant :DIGITS, :LETTERS
-
-#   @@used_names = []
-
-#   attr_reader :name
-
-#   def initialize
-#     @name = nil
-#     restore_factory_settings
-#   end
-
-#   def reset
-#     @@used_names.delete(@name)  # added this after seeing LS Algorithm section
-#     restore_factory_settings
-#   end
-
-#   private
-
-#   def restore_factory_settings
-#     name = nil
-#     loop do
-#       name = random_name
-#       break unless @@used_names.include?(name)
-#     end
-#     @@used_names << name
-#     @name = name
-#   end
-
-#   def random_name
-#     random_letters(2) + random_digits(3)
-#   end
-
-#   def random_digits(num)
-#     digits = ''
-#     num.times { digits << DIGITS.sample }
-#     digits
-#   end  
-
-#   def random_letters(num)
-#     letters = ''
-#     num.times { letters << LETTERS.sample }
-#     letters
-#   end
-# end
-
-# 31:52
-
-# LS solution
 class Robot
-  @@names = []
+  DIGITS = ('0'..'9').to_a.freeze
+  LETTERS = ('A'..'Z').to_a.freeze
+  private_constant :DIGITS, :LETTERS
 
-  def name
-    return @name if @name
-    @name = generate_name while @@names.include?(@name) || @name.nil?
-    @@names << @name
-    @name
+  @@used_names = []
+
+  attr_reader :name
+
+  def initialize
+    @name = nil
+    restore_factory_settings
   end
 
   def reset
-    @@names.delete(@name)
-    @name = nil
+    @@used_names.delete(@name) # added this after seeing LS Algorithm section
+    restore_factory_settings
   end
 
   private
 
-  def generate_name
-    name = ''
-    2.times { name << rand(65..90).chr }
-    3.times { name << rand(0..9).to_s }
-    name
+  def restore_factory_settings
+    name = nil
+    loop do
+      name = random_name
+      break unless @@used_names.include?(name)
+    end
+    @@used_names << name
+    @name = name
+  end
+
+  def random_name
+    random_letters(2) + random_digits(3)
+  end
+
+  def random_digits(num)
+    digits = ''
+    num.times { digits << DIGITS.sample }
+    digits
+  end
+
+  def random_letters(num)
+    letters = ''
+    num.times { letters << LETTERS.sample }
+    letters
   end
 end
+
+# 31:52
+
+# LS solution
+# class Robot
+#   @@names = []
+
+#   def name
+#     return @name if @name
+#     @name = generate_name while @@names.include?(@name) || @name.nil?
+#     @@names << @name
+#     @name
+#   end
+
+#   def reset
+#     @@names.delete(@name)
+#     @name = nil
+#   end
+
+#   private
+
+#   def generate_name
+#     name = ''
+#     2.times { name << rand(65..90).chr }
+#     3.times { name << rand(0..9).to_s }
+#     name
+#   end
+# end

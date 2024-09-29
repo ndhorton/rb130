@@ -15,12 +15,11 @@ Letters range from 'A' through 'Z'
 Grids range from 1(1 * 2 - 1) through 51 (26 * 2 - 1)
 Grid must contain grid_size letters and spaces per row,
   meaning the right side must be padded with spaces before newline
- 
+
 Etc:
 
 If the diamond is given 'A', this results in a degenerate diamond
 consisting of a single 'A'
-
 
 A - 1st letter - grid size 1
 B - 2nd - 3
@@ -58,7 +57,7 @@ grid size = 5
 
 1st and last line: 0 spaces in between
 increases to 1, then by 2, so always odd
-middle line: grid_size - 2 spaces in between 
+middle line: grid_size - 2 spaces in between
 
 padding left right:
 grid size 5 / 2 = 2
@@ -93,19 +92,22 @@ An approach might be to generate array of arrays with ' '
   [' ', '*', ' ']
 ]
 
-So by this approach, we draw the first and last line with one 'A' at index grid_size / 2 + 1
+So by this approach, we draw the first and last line
+  with one 'A' at index grid_size / 2 + 1
 Then, the index for the left letter is grid_size / 2 - 1, decrement each time
 Then, 1 up to grid_size / 2 - 1
 
 The index for the right letter is grid_size / 2 + 2, increment each time
 Then, 1 down to grid_size / 2 + 2
 
-Another approach is to draw the left side and mirror it, or draw the first half and mirror it
-This would only work well with the array approach, since we need to mirror half lines/whole lines
+Another approach is to draw the left side and mirror it, or draw the first half
+  and mirror it
+This would only work well with the array approach, since we need to mirror
+  half lines/whole lines
 
   [' ', ' ', 'A', ' ', ' '],
   [' ', 'B', ' ', 'B', ' '],
-  
+
   ['C', ' ', ' ', ' ', 'C']
   ,
   [' ', 'B', ' ', 'B', ' '],
@@ -152,45 +154,45 @@ return row
 
 =end
 
-# class Diamond
-#   GRID_SIZES = ('A'..'Z').zip(1.step(51, 2)).to_h.freeze
+class Diamond
+  GRID_SIZES = ('A'..'Z').zip(1.step(51, 2)).to_h.freeze
 
-#   def self.make_diamond(control_letter)
-#     grid_size = GRID_SIZES[control_letter]
+  def self.make_diamond(control_letter)
+    grid_size = GRID_SIZES[control_letter]
 
-#     diamond = generate_terminal_line(grid_size)
-#     diamond = draw_top_half(diamond, grid_size)
-#     diamond = draw_bottom_half(diamond, grid_size)
-#     diamond << generate_terminal_line(grid_size) if grid_size > 1
-#     diamond
-#   end
+    diamond = generate_terminal_line(grid_size)
+    diamond = draw_top_half(diamond, grid_size)
+    diamond = draw_bottom_half(diamond, grid_size)
+    diamond << generate_terminal_line(grid_size) if grid_size > 1
+    diamond
+  end
 
-#   class << self
-#     private
+  class << self
+    private
 
-#     def draw_top_half(diamond, grid_size)
-#       letter = 'A'
-#       1.step(grid_size - 2, 2) do |spaces|
-#         letter = letter.next
-#         diamond += (letter + (' ' * spaces) + letter).center(grid_size) + "\n"
-#       end
-#       diamond
-#     end
+    def draw_top_half(diamond, grid_size)
+      letter = 'A'
+      1.step(grid_size - 2, 2) do |spaces|
+        letter = letter.next
+        diamond += "#{(letter + (' ' * spaces) + letter).center(grid_size)}\n"
+      end
+      diamond
+    end
 
-#     def draw_bottom_half(diamond, grid_size)
-#       letter = GRID_SIZES.key(grid_size)
-#       1.step(grid_size - 4, 2).reverse_each do |spaces|
-#         letter = (letter.ord - 1).chr
-#         diamond += (letter + (' ' * spaces) + letter).center(grid_size) + "\n"
-#       end
-#       diamond
-#     end
-  
-#     def generate_terminal_line(grid_size)
-#       'A'.center(grid_size) + "\n"
-#     end
-#   end
-# end
+    def draw_bottom_half(diamond, grid_size)
+      letter = GRID_SIZES.key(grid_size)
+      1.step(grid_size - 4, 2).reverse_each do |spaces|
+        letter = (letter.ord - 1).chr
+        diamond += "#{(letter + (' ' * spaces) + letter).center(grid_size)}\n"
+      end
+      diamond
+    end
+
+    def generate_terminal_line(grid_size)
+      "#{'A'.center(grid_size)}\n"
+    end
+  end
+end
 
 # 58:59
 
@@ -242,43 +244,43 @@ return row
 # end
 
 # LS solution
-class Diamond
-  def self.make_diamond(letter)
-    range = ('A'..letter).to_a + ('A'...letter).to_a.reverse
-    diamond_width = max_width(letter)
+# class Diamond
+#   def self.make_diamond(letter)
+#     range = ('A'..letter).to_a + ('A'...letter).to_a.reverse
+#     diamond_width = max_width(letter)
 
-    range.each_with_object([]) do |let, arr|
-      arr << make_row(let).center(diamond_width)
-    end.join("\n") + "\n"
-  end
+#     range.each_with_object([]) do |let, arr|
+#       arr << make_row(let).center(diamond_width)
+#     end.join("\n") + "\n"
+#   end
 
-  class << self
-    private
+#   class << self
+#     private
 
-    def make_row(letter)
-      return "A" if letter == "A"
-      return "B B" if letter == "B"
+#     def make_row(letter)
+#       return "A" if letter == "A"
+#       return "B B" if letter == "B"
 
-      letter + determine_spaces(letter) + letter
-    end
+#       letter + determine_spaces(letter) + letter
+#     end
 
-    def determine_spaces(letter)
-      all_letters = ['B']
-      spaces = 1
+#     def determine_spaces(letter)
+#       all_letters = ['B']
+#       spaces = 1
 
-      until all_letters.include?(letter)
-        current_letter = all_letters.last
-        all_letters << current_letter.next
-        spaces += 2
-      end
+#       until all_letters.include?(letter)
+#         current_letter = all_letters.last
+#         all_letters << current_letter.next
+#         spaces += 2
+#       end
 
-      ' ' * spaces
-    end
+#       ' ' * spaces
+#     end
 
-    def max_width(letter)
-      return 1 if letter == 'A'
+#     def max_width(letter)
+#       return 1 if letter == 'A'
 
-      determine_spaces(letter).count(' ') + 2
-    end
-  end
-end
+#       determine_spaces(letter).count(' ') + 2
+#     end
+#   end
+# end

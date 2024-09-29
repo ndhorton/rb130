@@ -1701,3 +1701,43 @@ enum.take(10).force
 
 
 
+<u>Ostruct</u>
+
+An `OpenStruct` is a standard library class that lets us work with a hash as though it were a C-style struct. Or alternately, as though the hash were an object of a custom class with getters and setters for the hash values instead of keys. Or again, as though a Ruby hash were a JavaScript object.
+
+We can then add attributes to the Ostruct simply by addressing it as though a setter method for that attribute already existed.
+
+```ruby
+require 'ostruct'
+
+attributes = { name: "Jeremy Walker", age: 21, location: "Nomadic" }
+person = OpenStruct.new(attributes)
+
+person.name  # Jeremy Walker
+
+person.location  # Nomadic
+
+# Update the age
+person.age = 35
+
+# It sets correctly
+person.age  # 35
+
+# We can add a new attribute as easily as we might add a new hash key
+person.foo = "bar"
+
+person.foo  # "bar"
+```
+
+If we had an array of Ostructs which all had an `#age` attribute, we could do this
+
+```ruby
+people.sum { |person| person.age }
+# or more simply
+people.sum(&:age)
+```
+
+
+
+
+

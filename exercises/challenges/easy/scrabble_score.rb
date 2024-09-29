@@ -47,39 +47,38 @@ reduce each current_letter in letters starting accumulator at 0
 return result
 =end
 
-class Scrabble
-  attr_reader :word
+# class Scrabble
+#   attr_reader :word
 
-  def initialize(word)
-    @word = word.nil? ? '' : word
-  end
+#   def initialize(word)
+#     @word = word.nil? ? '' : word
+#   end
 
-  def self.score(word)
-    Scrabble.new(word).score
-  end
+#   def self.score(word)
+#     Scrabble.new(word).score
+#   end
 
-  def score
-    word.upcase.chars.reduce(0) do |acc, current_letter|
-      acc + score_letter(current_letter)
-    end
-  end
+#   def score
+#     word.upcase.chars.reduce(0) do |acc, current_letter|
+#       acc + score_letter(current_letter)
+#     end
+#   end
 
-  private
+#   private
 
-  def score_letter(letter)
-    case letter
-    when 'A', 'E', 'I', 'O', 'U', 'L', 'N', 'R', 'S', 'T' then 1
-    when 'D', 'G' 	                                      then 2
-    when 'B', 'C', 'M', 'P' 	                            then 3
-    when 'F', 'H', 'V', 'W', 'Y' 	                        then 4
-    when 'K'             	                                then 5
-    when 'J', 'X' 	                                      then 8
-    when 'Q', 'Z'       	                                then 10
-    else
-      0
-    end
-  end
-end
+#   def score_letter(letter)
+#     case letter
+#     when 'A', 'E', 'I', 'O', 'U', 'L', 'N', 'R', 'S', 'T' then 1
+#     when 'D', 'G' 	                                      then 2
+#     when 'B', 'C', 'M', 'P' 	                            then 3
+#     when 'F', 'H', 'V', 'W', 'Y' 	                        then 4
+#     when 'K'             	                                then 5
+#     when 'J', 'X' 	                                      then 8
+#     when 'Q', 'Z'       	                                then 10
+#     else                                                       0
+#     end
+#   end
+# end
 
 # 25:15
 
@@ -117,3 +116,43 @@ end
 #     Scrabble.new(word).score
 #   end
 # end
+
+# My #score_letter failed cyclomatic complexity, easy enough to convert to hash
+
+class Scrabble
+  LETTER_SCORES = {
+    "AEIOULNRST" => 1,
+    "DG" => 2,
+    "BCMP" => 3,
+    "FHVWY" => 4,
+    "K" => 5,
+    "JX" => 8,
+    "QZ" => 10
+  }.freeze
+  private_constant :LETTER_SCORES
+
+  attr_reader :word
+
+  def initialize(word)
+    @word = word.nil? ? '' : word
+  end
+
+  def self.score(word)
+    Scrabble.new(word).score
+  end
+
+  def score
+    word.upcase.chars.reduce(0) do |acc, current_letter|
+      acc + score_letter(current_letter)
+    end
+  end
+
+  private
+
+  def score_letter(letter)
+    LETTER_SCORES.each_pair do |letters, score|
+      return score if letters.include?(letter)
+    end
+    0
+  end
+end

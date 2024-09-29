@@ -17,7 +17,8 @@ Therefore, it's guarenteed that each day of the week will have exactly one date
 that is the 'teenth' of that day in a given month.
 
 approach:
-for first we just start on the first of the month and iterate until date is a `weekday`
+for first we just start on the first of the month and
+  iterate until date is a `weekday`
   could do something like,
     d += 1 until d.wday == WEEKDAY_TO_NUMERIC[weekday]
   or
@@ -27,7 +28,7 @@ for third, do first and then add 7*2
 for fourth, do first and then add 7*3
 for fifth, do first and then add 7*4
   but then we need to check if we're still in the same month
-  
+
 for teenth, we could simply
   jump to 13 (d += 12)
   iterate from 13 to 19 and stop when we get to the
@@ -134,15 +135,15 @@ class Meetup
   end
 
   def third(weekday)
-    first(weekday) + 7 * 2
+    first(weekday) + (7 * 2)
   end
 
   def fourth(weekday)
-    first(weekday) + 7 * 3
+    first(weekday) + (7 * 3)
   end
 
   def fifth(weekday)
-    date = first(weekday) + 7 * 4
+    date = first(weekday) + (7 * 4)
     date.month == fixed_date.month ? date : nil
   end
 
@@ -153,7 +154,7 @@ class Meetup
   end
 
   def last(weekday)
-    fifth(weekday) || fourth(weekday) 
+    fifth(weekday) || fourth(weekday)
   end
 end
 

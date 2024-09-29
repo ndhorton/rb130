@@ -10,8 +10,6 @@ It must behave like a set of unique elements with the following operations.
 
 Assume all elements are numbers.
 
-
-
 Etc:
 
 Set has no concept of order of elements
@@ -31,15 +29,16 @@ CustomSet class
     equivalently, two disjoint sets are sets whose intersection is
     the empty set" - wikipedia
     the empty set is disjoint with any set including itself
-  
-  #eql? - [class, all state] == other.[class, all state] (check this, think it uses hash function)
+
+  #eql? - [class, all state] == other.[class, all state]
+          (check this, think it uses hash function)
     order of elements passed to constructor should not affect truth value
     duplicate elements passed to constructor should not affect truth value
   #hash [self.class, @hash].hash
-  
+
   #add - add an element to set, mutates caller, MUST return self
   #== - must have equivalent elements
-  #intersection - returns new set that contains only the elements that are in 
+  #intersection - returns new set that contains only the elements that are in
     both caller and arg
     iterate through each key of one set
       if key is in other set
@@ -53,7 +52,8 @@ DS:
 Use hash to store set members with default value of false
 When adding, insert new key => true
 When comparing with ==, @hash == @hash
-When comparing with eql?, hash -> [self.class, @hash] == other.hash ->[self.class, @hash]
+When comparing with eql?,
+  hash -> [self.class, @hash] == other.hash ->[self.class, @hash]
 
 #empty? - @hash.empty?
 #contains? @hash[key] == true
@@ -78,7 +78,6 @@ Instantiate new CustomSet, result
 iterate through keys of @hash
   if other.contains? key
     result[key] = true
-
 
 #difference
 Given a CustomSet, other
@@ -118,7 +117,7 @@ class CustomSet
   end
 
   def disjoint?(other)
-    set.keys.none? { |member| other.contains? (member) }
+    set.keys.none? { |member| other.contains?(member) }
   end
 
   def add(element)

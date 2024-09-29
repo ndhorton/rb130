@@ -4,7 +4,7 @@
 
 P:
 
-Write a program to determine whether a triangle is 
+Write a program to determine whether a triangle is
   equilateral, - all sides same length
   isosceles,   - exactly two sides same length
   or scalene.  - all sides different lengths
@@ -51,7 +51,8 @@ If any of sides <= 0 OR
     side1 + side2 <= side3 OR
     side1 + side3 <= side2 OR
     side2 + side3 <= side1
-  Raise ArgumentError, "arguments must describe side lengths of non-degenerate triangle."
+  Raise ArgumentError,
+    "arguments must describe side lengths of non-degenerate triangle."
 
 Set counts := values only of a tally of counts of sides
 If counts includes 3
@@ -62,50 +63,23 @@ Else
   Return "scalene"
 =end
 
-# class Triangle
-#   attr_reader :side1, :side2, :side3
-
-#   def initialize(side1, side2, side3)
-#     sides = [side1, side2, side3]
-#     if sides.any? { |side| side <= 0 } ||
-#       side1 + side2 <= side3 ||
-#       side1 + side3 <= side2 ||
-#       side2 + side3 <= side1
-#       raise ArgumentError, "arguments must define side-lengths of a " \
-#         "non-degenerate triangle."
-#     end
-
-#     @side1 = side1
-#     @side2 = side2
-#     @side3 = side3
-#   end
-
-#   def kind
-#     sides = [side1, side2, side3]
-#     counts = sides.tally.values
-#     if counts.include?(3)
-#       'equilateral'
-#     elsif counts.include?(2)
-#       'isosceles'
-#     else
-#       'scalene'
-#     end
-#   end
-# end
-
-# LS solution
 class Triangle
-  attr_reader :sides # I would personally make this a manual getter to protect
-                     # the values stored in the @sides array
+  attr_reader :side1, :side2, :side3
+
   def initialize(side1, side2, side3)
-    @sides = [side1, side2, side3]
-    raise ArgumentError.new "Invalid triangle lengths" unless valid?
+    raise ArgumentError unless valid_triangle(side1, side2, side3)
+
+    @side1 = side1
+    @side2 = side2
+    @side3 = side3
   end
 
   def kind
-    if sides.uniq.size == 1
+    sides = [side1, side2, side3]
+    counts = sides.tally.values
+    if counts.include?(3)
       'equilateral'
-    elsif sides.uniq.size == 2
+    elsif counts.include?(2)
       'isosceles'
     else
       'scalene'
@@ -114,10 +88,42 @@ class Triangle
 
   private
 
-  def valid?
-    sides.min > 0 &&
-      sides[0] + sides[1] > sides[2] &&
-      sides[1] + sides[2] > sides[0] &&
-      sides[0] + sides[2] > sides[1]
+  def valid_triangle(side1, side2, side3)
+    sides = [side1, side2, side3]
+    sides.all?(&:positive?) &&
+      side1 + side2 > side3 &&
+      side1 + side3 > side2 &&
+      side2 + side3 > side1
   end
 end
+
+# LS solution
+# class Triangle
+#   attr_reader :sides # I would personally make this a manual getter with #dup
+
+#   def initialize(side1, side2, side3)
+#     @sides = [side1, side2, side3]
+#     raise ArgumentError, "Invalid triangle lengths" unless valid?
+#   end
+
+#   def kind
+#     if sides.uniq.size == 1
+#       'equilateral'
+#     elsif sides.uniq.size == 2
+#       'isosceles'
+#     else
+#       'scalene'
+#     end
+#   end
+
+#   private
+
+#   def valid?
+#     # LS version causes AbcSize cop to comlain
+#     # should assign the array elements to variables
+#     sides.min > 0 &&
+#       sides[0] + sides[1] > sides[2] &&
+#       sides[1] + sides[2] > sides[0] &&
+#       sides[0] + sides[2] > sides[1]
+#   end
+# end

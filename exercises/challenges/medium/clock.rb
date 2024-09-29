@@ -29,18 +29,18 @@ missed modulo by 1440
 new_hours, new_minutes = current_time divmod 60
 
 3.2.2 :001 > current_time = 23 * 60 + 30
- => 1410 
+ => 1410
 3.2.2 :002 > current_time += 60
- => 1470 
+ => 1470
 3.2.2 :003 > current_time %= 1440
- => 30 
+ => 30
 3.2.2 :004 > new_hours, new_minutes = current_time.divmod(60)
- => [0, 30] 
+ => [0, 30]
 3.2.2 :005 > new_hours
- => 0 
+ => 0
 3.2.2 :006 > new_minutes
- => 30 
-3.2.2 :007 > 
+ => 30
+3.2.2 :007 >
 
 Need to implement #== method
 to satisfy test suite (assert_equal, refute_equal)
@@ -99,7 +99,7 @@ class Clock
   end
 
   def +(additional_minutes)
-    current_total_minutes = hour * 60 + minute
+    current_total_minutes = (hour * 60) + minute
     current_total_minutes += additional_minutes
     current_total_minutes %= MINUTES_IN_DAY
     new_hour, new_minute = current_total_minutes.divmod(60)
@@ -107,7 +107,7 @@ class Clock
   end
 
   def -(minutes_difference)
-    self.+(-minutes_difference) # needs to be distinguished from unary +
+    self + (-minutes_difference) # needs to be distinguished from unary +
   end
 
   def self.at(hour, minute = 0)

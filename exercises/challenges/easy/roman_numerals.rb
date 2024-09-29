@@ -33,7 +33,7 @@ else
 when ""                  0 -> ''
 when multiplied_value in 1..9 -> 'I' * digit
 when " "                 10..90 -> 'X' * digit
-when 
+when
 
 1 -> I
 
@@ -108,7 +108,10 @@ when (1000..9000)   then return 'M' * (value / 1000)
 =end
 
 # class RomanNumeral
-#   SUBTRACTION_CASE = {
+#   attr_reader :digit_string
+
+#   IRREGULAR_CASE = {
+#     0 => '',
 #     4 => 'IV',
 #     9 => 'IX',
 #     40 => 'XL',
@@ -118,84 +121,133 @@ when (1000..9000)   then return 'M' * (value / 1000)
 #   }
 
 #   def initialize(decimal)
-#     @decimal = decimal
+#     @digit_string = decimal.to_s
 #   end
 
 #   def to_roman
-#     digit_string = @decimal.to_s
-#     places = digit_string.size
-#     numeral = ''
-#     digit_string.each_char.with_index(1) do |digit, index|
-#       exponent = places - index
-#       current_value = (digit.to_i) * (10 ** exponent)
-#       if SUBTRACTION_CASE.keys.include?(current_value)
-#         numeral << SUBTRACTION_CASE[current_value]
+#     digit_string.each_char.with_index(1).map do |digit, index|
+#       exponent = digit_string.size - index
+#       current_value = (digit.to_i) * (10**exponent)
+#       if IRREGULAR_CASE.keys.include?(current_value)
+#         IRREGULAR_CASE[current_value]
 #       else
-#         numeral << regular_case(current_value)
+#         regular_case(current_value)
 #       end
-#     end
-#     numeral
+#     end.join
 #   end
 
 #   private
 
 #   def regular_case(value)
-#     return '' if value.zero?
-
 #     case value
 #     when (1..3)       then ('I' * value)
-#     when (5..8)       then ('V' + ('I' * (value - 5)))
+#     when (5..8)       then ("V#{('I' * (value - 5))}")
 #     when (10..30)     then ('X' * (value / 10))
-#     when (50..80)     then ('L' + ('X' * ((value - 50) / 10)))
+#     when (50..80)     then ("L#{('X' * ((value - 50) / 10))}")
 #     when (100..300)   then ('C' * (value / 100))
-#     when (500..800)   then ('D' + ('C' * ((value - 500) / 100)))
-#     when (1000..4000) then ('M' * (value / 1000))
+#     when (500..800)   then ("D#{('C' * ((value - 500) / 100))}")
+#     else                   ('M' * (value / 1000))
 #     end
 #   end
 # end
 
 # 55 minutes
+# The `RomanNumeral#regular_case` method is pushing the limit
+# of Cyclomatic Complexity. Had to tinker to make it pass
+# Rubcop. The LS solution is clearly better.
 
 # LS solution/extra challenge
 
+# class RomanNumeral
+#   attr_reader :number
+
+#   ROMAN_NUMERALS = {
+#     "I" => 1,
+#     "IV" => 4,
+#     "V" => 5,
+#     "IX" => 9,
+#     "X" => 10,
+#     "XL" => 40,
+#     "L" => 50,
+#     "XC" => 90,
+#     "C" => 100,
+#     "CD" => 400,
+#     "D" => 500,
+#     "CM" => 900,
+#     "M" => 1000,
+#   }
+
+#   def initialize(number)
+#     @number = number
+#   end
+
+#   def to_roman
+#     ordered_numerals = ROMAN_NUMERALS.keys.sort do |a, b|
+#       ROMAN_NUMERALS[b] <=> ROMAN_NUMERALS[a]
+#     end
+#     roman_version = ''
+#     to_convert = number
+
+#     ordered_numerals.each do |key|
+#       value = ROMAN_NUMERALS[key]
+#       multiplier, remainder = to_convert.divmod(value)
+#       if multiplier > 0
+#         roman_version += (key * multiplier)
+#       end
+#       to_convert = remainder
+#     end
+#     roman_version
+#   end
+# end
+
 class RomanNumeral
-  attr_reader :number
+  NUMERAL_VALUES = {
+    'I' => 1,
+    'IV' => 4,
+    'V' => 5,
+    'IX' => 9,
+    'X' => 10,
+    'XL' => 40,
+    'L' => 50,
+    'XC' => 90,
+    'C' => 100,
+    'CD' => 400,
+    'D' => 500,
+    'CM' => 900,
+    'M' => 1000
+  }.freeze
+  private_constant :NUMERAL_VALUES
 
-  ROMAN_NUMERALS = {
-    "I" => 1,
-    "IV" => 4,
-    "V" => 5,
-    "IX" => 9,
-    "X" => 10,
-    "XL" => 40,
-    "L" => 50,
-    "XC" => 90,
-    "C" => 100,
-    "CD" => 400,
-    "D" => 500,
-    "CM" => 900,
-    "M" => 1000,
-  }
+  attr_reader :decimal
 
-  def initialize(number)
-    @number = number
+  def initialize(decimal)
+    @decimal = decimal
   end
 
   def to_roman
-    ordered_numerals = ROMAN_NUMERALS.keys.sort do |a, b|
-      ROMAN_NUMERALS[b] <=> ROMAN_NUMERALS[a]
-    end
-    roman_version = ''
-    to_convert = number
+    # set number = decimal
+    # set result = empty string
+    # iterate through each numeral in descending_numerals
+    #   set quotient, remainder =  number divmod NUMERAL_VALUES[numeral]
+    #   if quotient is not 0
+    #     number = remainder
+    #     append numeral * quotient to result
+    # return result
 
-    ordered_numerals.each do |key|
-      value = ROMAN_NUMERALS[key]
-      multiplier, remainder = to_convert.divmod(value)
-      if multiplier > 0
-        roman_version += (key * multiplier)
-      end
-      to_convert = remainder
+    remaining_number = decimal
+    descending_numerals.each_with_object('') do |numeral, result|
+      quotient, remainder = remaining_number.divmod(NUMERAL_VALUES[numeral])
+      next if quotient.zero?
+      remaining_number = remainder
+      result << (numeral * quotient)
     end
-    roman_version
+  end
+
+  private
+
+  def descending_numerals
+    NUMERAL_VALUES.keys.sort do |a, b|
+      NUMERAL_VALUES[b] <=> NUMERAL_VALUES[a]
+    end
   end
 end

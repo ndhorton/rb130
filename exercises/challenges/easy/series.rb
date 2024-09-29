@@ -38,35 +38,34 @@ Return result
 
 =end
 
-# class Series
-#   attr_reader :digits
+class Series
+  attr_reader :digits
 
-#   def initialize(digits)
-#     @digits = digits
-#   end
+  def initialize(digits)
+    @digits = digits
+  end
 
-#   def slices(slice_length)
-#     raise ArgumentError if slice_length > digits.length
+  def slices(slice_length)
+    raise ArgumentError if slice_length > digits.length
 
-#     numeric_digits = digits.each_char.map(&:to_i)
-#     numeric_digits.each_cons(slice_length).to_a
-#   end
-# end
+    numeric_digits = digits.each_char.map(&:to_i)
+    numeric_digits.each_cons(slice_length).to_a
+  end
+end
 
 # 13:22
 
 # LS solution
-class Series
-  attr_accessor :number_string
+# class Series
+#   attr_accessor :number_string
 
-  def initialize(str)
-    @number_string = str
-  end
+#   def initialize(str)
+#     @number_string = str
+#   end
 
-  def slices(length)
-    raise ArgumentError.new if length > number_string.size
+#   def slices(length)
+#     raise ArgumentError.new if length > number_string.size
 
-    number_string.chars.map(&:to_i).each_cons(length).to_a
-  end
-end
-
+#     number_string.chars.map(&:to_i).each_cons(length).to_a
+#   end
+# end
