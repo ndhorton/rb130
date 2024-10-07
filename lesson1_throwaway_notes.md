@@ -1739,5 +1739,9 @@ people.sum(&:age)
 
 
 
+<u>More on closures</u>
 
+Closures defined in the same scope may well share local variables (depending when/where those variables are initialized). This can be a feature or a source of errors.
+
+The binding of a closure includes any block that is available to `yield` to in the scope where the closure is defined.
 
