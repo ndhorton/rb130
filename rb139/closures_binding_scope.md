@@ -1,10 +1,23 @@
+I feel 'blocks and variable scope' is pretty much covered by this topic, at least in terms of material
+
+
+
+Material:
+
+1:2: Closures in Ruby
+
+1:4: Writing Methods that take Blocks (just for benefits of closures)
+
+1:14: Blocks and Variable Scope (for scope and binding)
+
 
 
 Closure
 
 Definition
 
-* A closure is a general programming concept that allows programmers to save a "chunk of code" to be passed around and executed later. A closure binds to the surrounding artifacts at the point in our program where the closure is defined (such as local variables, "closing over" or "enclosing" the surrounding context that the code chunk needs in order to be executed later.
+* A closure is a general programming concept that allows programmers to save a "chunk of code" to be passed around and executed later. 
+* A closure binds to the surrounding artifacts at the point in our program where the closure is defined (such as local variables), "closing over" or "enclosing" the surrounding context that the code chunk needs in order to be executed later.
 * We can think of closures as like anonymous methods or functions, but with an environment attached, which in Ruby is called the closure's "binding".
 * Different languages implement closures differently, with varying levels of support. Some languages do not implement them at all.
 
@@ -16,11 +29,100 @@ Benefits
 
 * In Ruby, we use closures, specifically blocks, to defer part of the implementation of methods to the point of invocation, allowing the method user to refine a generic method for the task at hand without affecting other users of the method. Many of Ruby's `Enumerable` methods, such as `map` and `sort`, are examples of this use of closures.
 * Closures, particularly blocks, are used in Ruby to implement sandwich code methods, methods that perform some actions before and after the logic in the closure. `File::open` is an example of this use of closures.
+* Closures allow us to write more generic methods
 * A method can return a closure; we can customize the closure that the method returns based on the method arguments.
 
 
 
+Binding
+
+1. Closures retain a memory of the local variables in outer scopes at the point of the source code where the closure is created.
+2. A local variable must be initialized before the closure is created for the closure to bind it.
+3. If a local variable that is bound by a Proc or lambda is reassigned after the Proc or lambda is created, that reassignment will be reflected in the binding of the Proc or lambda. The closure binds to the variable itself, not the value of the variable.
+4. A closure must keep track of its binding to have all the information it needs to be executed later (in a possibly different scope). This not only includes local variables, but also method references, constants and other artifacts in your code -- whatever it needs to execute correctly.
+
+
+
+Scoping rules:
+
+Local variables:
+
+* A closure can access local variables from "outer" scopes at the point in the source code where the closure is created.
+* A closure can only access local variables that are initialized before the closure is created.
+* A local variable instantiated within a closure is local to that closure. If another closure is created within the closure, it will bind the closure-local variable. This is what is meant be "outer and inner block scopes"
+* Once the closure is created, reassigning a local variable outside of the closure will be reflected in the closure's binding. The captured local variable is effectively an alias for the local variable outside the closure.
+* A closure will keep a local variable alive even after the method that initialized it has returned.
+* Multiple calls to a method that returns a closure that accesses a local variable from the method's scope will generate multiple closures that each have their own unique local variable of the same name. The method call's local variable will be a new variable each time the method is called.
+
+Instance variable:
+
+* A closure can only refer to an instance variable if it is initialized before the closure is *executed*. If the closure is executed before the instance variable is initialized, the reference will simply return `nil`, as references to uninitialized instance variables always do.
+* The instance variable still pertains to the object instance that encapsulates it. The value of `self` is bound by the closure.
+* A closure can instantiate an instance variable in the object referenced by `self` when the closure is created.
+
+Class variables:
+
+The same rules apply to class variables as instance variables (except that referencing an uninitialized class variable raises a `NameError` instead of evaluating to `nil`).
+
+Constants
+
+* Constant lookups from a closure follow the same lexical scoping rules as elsewhere, though the lookups will begin from the lexical scope of the closure's definition, not where the closure is called.
+* Constants need to be defined in the lexical scope of the closure's definition before the closure is *executed* but not before the closure is created.
+* A closure cannot initialize a constant (raises `SyntaxError`, dynamic constant assignment, same as methods).
+
+Methods:
+
+* A closure can reference methods defined after the closure is created so long as the method is defined before the closure is executed.
+
+With blocks, we can generally assume that a block can only access artifacts that exist before the block is created, since the block will generally be executed almost immediately by the method invocation on which the block is defined (assuming the block is not converted to a Proc and returned or passed to other methods). With Procs and lambdas we must be careful to notice when the Proc or lambda is actually called in order to predict which artifacts (other than local variables) it can access. Local variables always need to be initialized before a closure of any kind is created or the closure cannot access them.
+
+
+
 Notes
+
+Binding
+
+Lesson 1:14
+
+The thing that is bothering me about closure and binding is that the Binding object of the Proc object appears to have access to variables that the Proc does not have access to.
+
+```ruby
+pr = proc { p foo }
+foo = 5
+p pr.binding.local_variables # [:pr, :foo] -- the binding knows about variable `foo`
+pr.binding.eval("p foo") # 5
+pr.call # raises NameError -- the proc does not know about `foo`
+```
+
+However, this behavior doesn't seem different from the behavior of Binding objects generally:
+
+```ruby
+b = binding
+foo = 5
+p b.local_variables # [:b, :foo]
+```
+
+What's even weirder is that this is different in IRB, where any variables initialized after the Binding object is created are not present in the `local_variables` list. (Though a `:_` pseudovariable is present there instead).
+
+So my conclusion is that although closure binding involves the instantiation of a Binding object (available through `Proc#binding`), the closure's binding (as a scope/envirnoment) is not coextensive with its encapsulated Binding object. The Binding object clearly can have access to local variables that the closure does not have access to.
+
+Furthermore, we should probably not rely on a Binding object having access to variables initialized after the Binding is instantiated even if it this seems to be the case, at least outside of IRB.
+
+
+
+"The `Proc` is aware of the new value [for a local variable captured/bound by the closure] even though the variable was reassigned after the `Proc` was defined. This implies that the `Proc` keeps track of its surrounding context, and drags it around wherever the chunk of code is passed to. In Ruby, we call this its **binding**, or surrounding environment/context."
+
+"A closure must keep track of its binding to have all the information it needs to be executed later. This not only includes local variables, but also method references, constants, and other artifacts in your code -- whatever it needs to execute correctly, it will drag all of it around... Note that any local variables that need to be accessed by a closure must be defined *before* the closure is created, unless the local variable is explicitly passed to the closure when it is called [as an argument]..."
+
+1. Closures retain a memory of the local variables initialized before they are created in lexical scope at that point of the source code.
+2. If a local variable that is bound by a Proc or lambda is reassigned after the Proc or lambda is created, that reassignment will be reflected in the binding of the Proc or lambda. The closure binds to the variable itself, not the value of the variable.
+3. A closure must keep track of its binding to have all the information it needs to be executed later (in a possibly different scope). This not only includes local variables, but also method references, constants and other artifacts in your code -- whatever it needs to execute correctly.
+
+
+
+
+
+
 
 Lesson 1:2
 
