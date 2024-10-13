@@ -10,6 +10,8 @@ Material:
 
 1:14: Blocks and Variable Scope (for scope and binding)
 
+1: Question: Blocks and Method Calls
+
 
 
 Closure
@@ -79,6 +81,56 @@ With blocks, we can generally assume that a block can only access artifacts that
 
 
 Notes
+
+method scope from Question Blocks and Method Calls (lesson 1)
+
+"Ruby handles method look ups differently than variables"
+
+"We're used to calling methods explicitly on objects... When we don't use an explicit caller, the method is implicitly called on `self`... If we try to invoke a method without an explicit caller and *without parentheses*, Ruby will first check to see if there is a local variable of that name within scope (which in the case of a block includes its binding). If there is then Ruby will return the object referenced by the local variable, if not it will attempt to call a method of that name on `self`."
+
+So using an identifier that doesn't exist will raise a `NameError`, using an identifier followed by parentheses that doesn't exist will raise a `NoMethodError`.
+
+"So what is the `main` object? It's an instance of the `Object` class... but... it's also the `Object` class itself (kind of, it's more complex than that, but... that's a good enough mental model)... methods defined in the `main` scope are `private` by default."
+
+"This means that we can define methods in the `main` scope, and then call those methods on `self`"
+
+What he's trying to say is that:
+
+Methods defined in the `main` scope are actually defined as private instance methods of the Object class. We can call private methods without an explicit caller and the implicit caller will be the current object `self`. This means that we can always call `main` toplevel methods implicitly on`self`, because, apart from BasicObject instances, all objects in Ruby inherit from Object.
+
+When we invoke a method that does not exist yet within a Proc or lambda definition, it will not raise an exception so long as the method gets defined before the Proc or lambda is actually executed. Ruby will check the method lookup path dynamically when the Proc is called, and so long as the method is in the method lookup path for the class of the object `self` (in the closure's context) at the time the Proc is executed, the method will be successfully called. 
+
+
+
+```ruby
+my_proc = Proc.new { puts d }
+
+def d
+  4
+end
+
+my_proc.call # => 4
+```
+
+On line 1, we create the Proc object `my_proc`, whose code references `d`. An instance variable `d` that is initialized after this would not be available to `my_proc`, but we can define a method `d`, as we do on lines 3-5.
+
+When we call `my_proc` on line 7, the code defined on line 1 executes. Ruby checks for a local variable `d` in the Proc's scope, including its binding, and does not find one. Next, Ruby treats `d` as a method call without parentheses invoked implicitly on `self`. Ruby searches the method lookup path of the class of the object referenced by `self` in the closure's binding. This object is `main` and its class is Object. Since our `d` method is defined in the `main` scope (and is therefore defined as a `private` instance method of Object), Ruby finds the method in the method lookup path and successfully calls it. `d` returns `4`, which is passed to the `puts` method to be output to screen. This is the last expression in the Proc, so the `my_proc` returns `nil` (the return value of `puts`) and execution returns to line 7, where the program ends.
+
+If we were to call  `my_proc` before `d` was defined as a method, it would raise a `NameError`:
+
+```ruby
+my_proc_4 = Proc.new { puts d }
+
+p my_proc_4.call # => NameError: undefined local variable or method `d' for main:Object
+
+def d
+  4
+end
+```
+
+"This dives a little deeper under the hood than we cover in the course."
+
+
 
 Binding
 
@@ -293,5 +345,17 @@ chunk_of_code = Proc.new {puts "hi #{name}"}
 name = "Robert"
 
 call_me(chunk_of_code)  # raises NameError, `name` was initialized after Proc defined
+```
+
+This example demonstrates defining a method after a Proc is created, question what would happen if this code were run:
+
+```ruby
+my_proc = Proc.new { puts d }
+
+def d
+  4
+end
+
+my_proc.call
 ```
 
