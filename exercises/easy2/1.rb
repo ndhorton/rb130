@@ -6,7 +6,14 @@ def step(start, finish, difference)
     yield(counter)
     counter += difference
   end
+  start
 end
+
+# My thinking for the return value is that this method
+# actually resembles Integer#step more than Range#step
+# and since Integer#step returns the caller, the starting number,
+# I decided to return the first argument, the starting number,
+# imitating the conventions of Ruby's core classes.
 
 # LS solution
 def step(start_point, end_point, increment)
@@ -19,4 +26,4 @@ def step(start_point, end_point, increment)
   current_value
 end
 
-step(1, 10, 3) { |value| puts "value = #{value}" }
+p step(1, 10, 3) { |value| puts "value = #{value}" }

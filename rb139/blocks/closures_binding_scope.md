@@ -25,20 +25,20 @@ Definition
 
 Implementation
 
-* In Ruby, there are three ways to work with closures: blocks, regular `Proc` objects, and lambdas. Procs and lambdas can be passed around as objects, first-class citizens. Blocks can only be passed to the method on which the block is defined, though a block can be invoked multiple times by that method or even converted to a `Proc` via prefixing a parameter name with the unary `&` operator.
+* In Ruby, there are three ways to work with closures: blocks, regular `Proc` objects, and lambdas. Procs and lambdas can be passed around as objects, first-class citizens. Blocks can only be passed to the method on which the block is defined, though a block can be invoked multiple times by that method or even converted to a `Proc` object by prefixing the final parameter in the parameter list with the unary `&` operator.
 
 Benefits
 
 * In Ruby, we use closures, specifically blocks, to defer part of the implementation of methods to the point of invocation, allowing the method user to refine a generic method for the task at hand without affecting other users of the method. Many of Ruby's `Enumerable` methods, such as `map` and `sort`, are examples of this use of closures.
 * Closures, particularly blocks, are used in Ruby to implement sandwich code methods, methods that perform some actions before and after the logic in the closure. `File::open` is an example of this use of closures.
 * Closures allow us to write more generic methods
-* A method can return a closure; we can customize the closure that the method returns based on the method arguments.
+* A method can return a closure; the method can customize the closure that the method returns based on the method arguments.
 
 
 
 Binding
 
-1. Closures retain a memory of the local variables in outer scopes at the point of the source code where the closure is created.
+1. Closures retain a memory of the local variables in scope at the time and location in the source code where the closure is created.
 2. A local variable must be initialized before the closure is created for the closure to bind it.
 3. If a local variable that is bound by a Proc or lambda is reassigned after the Proc or lambda is created, that reassignment will be reflected in the binding of the Proc or lambda. The closure binds to the variable itself, not the value of the variable.
 4. A closure must keep track of its binding to have all the information it needs to be executed later (in a possibly different scope). This not only includes local variables, but also method references, constants and other artifacts in your code -- whatever it needs to execute correctly.
