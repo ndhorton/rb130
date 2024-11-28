@@ -198,6 +198,10 @@ So this means that we may have a test that exercises a method, and the test pass
 
 "Though many people use RSpec, Minitest is Ruby's default testing library and is part of Ruby's standard library. More specifically, it's a bundled gem, which means Minitest is shipped with the default Ruby installation, but is maintained outside the Ruby core team and can be uninstalled if necessary."
 
+* Minitest is Ruby's default testing library and a part of the Standard Library.
+
+  
+
 ASIDE
 
 from stdgems.org: About Ruby's Gemified Standard Library
@@ -214,7 +218,7 @@ END ASIDE
 
 "**From a purely functional standpoint, Minitest can do everything RSpec can**. However, **Minitest provides a simpler and more straightforward syntax**. RSpec bends over backwards to allow developers to write code that reads like natural English, but at the cost of simplicity. *RSpec is what we call a* **Domain Specific Language**; it's a DSL for writing tests. Minitest can also use a DSL, but it can also be used in a way that reads like ordinary Ruby code without a lot of magical syntax. This simpler style isn't a DSL, it's just Ruby.
 
-* Minitest can do anything RSpec can do
+* In terms of basic functionality, Minitest can do anything RSpec can do. However, Minitest has a straightforward default syntax that is largely just Ruby code.
 * Minitest is part of the Ruby standard library, while RSpec is not. Minitest is a bundled gem, meaning it is installed with the Ruby installation as the default Ruby testing library, though it can be uninstalled if necessary. RSpec is a normal gem that must be deliberately installed by the user.
 * RSpec is a Domain Specific Language designed to allow us to write tests that read very much like natural English. While Minitest can optionally use a DSL, the standard Minitest syntax is for the most part standard Ruby syntax. This can make writing and understanding Minitest tests simpler than in RSpec, especially for beginners.
 
