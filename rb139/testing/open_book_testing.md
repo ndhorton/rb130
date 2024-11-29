@@ -40,7 +40,38 @@ Minitest's standard syntax is assert-style (or assertion-style) syntax. Minitest
 
 Minitest is not as flexible or powerful as RSpec but it does have all the functionality necessary for most testing scenarios.
 
+
+
 ### SEAT Approach
+
+The SEAT approach breaks down writing a test into four steps:
+
+1. Set up the necessary objects
+2. Execute the code against the object we're testing
+3. Assert that the executed code did the right thing
+4. Tear down and clean up any lingering artifacts
+
+
+
+1) Setup step.
+
+We generally need to instantiate objects before each test we run. This can be repetitious. For instance, if we have many of tests all of which test whether a class is functioning correctly, we might need to instantiate an object of that class before every individual test. In Minitest, we can extract this common set up step to the `#setup` method of our test class. The `#setup` method will be called before every test method in that class is executed.
+
+2. Execute step.
+
+We generally need to execute some code against the object we are testing in order to receive an expected return value, or to change the state of the object or achieve some other expected side effect.
+
+3. Assert step.
+
+This is the actual test step. Minitest has a range of assertions to deal with different expected outcomes.
+
+4. Teardown step.
+
+We often need to clean up lingering artifacts such as open file or database handles, freeing the resources that we have acquired, usually during the Setup step. In Minitest, we can write a `#teardown` method for our test class that is automatically called after each test method is run.
+
+
+
+Every test will require at least Execute and Assert steps. In Minitest, the `#setup` and `#teardown` methods are both optional, and each can be defined without the other. The `#setup` method is called automatically before each test in the class, and commonly instantiates objects and sets instance variables to them to be used in the tests. The `#teardown` method is automatically called after each test in the class. Use of these methods for common Setup and Teardown actions reduces repetition in our code.
 
 
 
