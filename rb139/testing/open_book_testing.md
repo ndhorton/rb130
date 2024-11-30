@@ -77,7 +77,19 @@ Every test will require at least Execute and Assert steps. In Minitest, the `#se
 
 ### Testing Equality
 
+The `assert_equal` assertion is one of the most commonly used assertions. The kind of equality asserted by `assert_equal(expected, actual)` is value equality, or equivalence of states. The method it uses to compare the `expected` object with the `actual` object is the `==` method, which returns `true` if the caller and argument have an equivalent representative object value, `false` otherwise. `assert_equal` fails unless `expected == actual`. This means that an appropriate `==` method must be defined for the objects being asserted against.
+
+The other form of equality we may wish to assert is object equality. For this we use the `assert_same` assertion. When we use `assert_same(expected, actual)`, we are testing whether the object referenced by `expected` is the same object with the same object id as the object referenced by `actual`; `assert_same` will fail unless this is the case. We can think of `assert_same` as using the `BasicObject#equal?` method.
+
+So `assert_equal` checks for value equality between two (potentially) different object, and `assert_same` checks for object equality between two variables (or other forms of object reference).
+
 
 
 ### Assertions
+
+An assertion is an actual test step, the verification step that confirms the actual data returned or output by our code is the data we expect. We can make one or more assertions within a test case. If the data returned by our program matches the expected data, the assertion passes; otherwise, the assertion fails.
+
+Refutations are the logical opposite of assertions. A refutation seeks to deny that the actual data returned by our code matches some proscribed data. A refutation fails if the data matches; otherwise, the refutation passes.
+
+Assertions are vastly more common than refutations, though sometimes the logic of a refutation is more readily comprehensible. Most assertion methods have a corresponding refutation. The refutation form of an assertion takes the same positional arguments and blocks as the assertion, but with the logic of passing or failure inverted.
 
