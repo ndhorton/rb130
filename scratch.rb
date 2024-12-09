@@ -1,5 +1,5 @@
-class << self
-  FOO = 5
+def test(&block)
+  puts "What's &block? #{block}"
 end
 
-puts singleton_class::FOO
+test { sleep(1) }
