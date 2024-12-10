@@ -718,6 +718,8 @@ This example demonstrates the implementation of a method similar to `Integer#tim
 
 6m40s
 
+
+
 23. Describe the flow of execution and output of the code below
 
 ```ruby
@@ -736,6 +738,28 @@ each([1, 2, 3, 4, 5]) do |num|
   puts num
 end
 ```
+
+On line 12, we call the `each` method with an array, `[1, 2, 3, 4, 5]`, passed as argument and a `do...end` block.
+
+The `each` method is defined on lines 1-10 with one parameter `array`, which on this invocation is assigned the array `[1, 2, 3, 4, 5]`.
+
+Within the body of the method definition, on line 2, we initialize method-local variable `counter` to `0`.
+
+On line 4, we enter a `while` loop, which continues while `counter` is less than the size of `array`.
+
+Within the loop, on line 5, we `yield` to the given block with the element of `array` at the index given by `counter` passed as argument.
+
+Execution jumps to the block defined over lines 12-14. The current `array` element is assigned to block parameter `num`.
+
+Within the body of the block, on line 13, we pass `num` to `Kernel#puts` to be output to the screen. `puts` returns `nil` as it always does and since this is the end of the block, the block also returns `nil`, though nothing is done with it.
+
+Execution resumes on line 6 of the `each` method definition, where we increment `counter`. The loop continues until `counter` references `5`.
+
+On line 9, we restate `array` as the implicit return value of `each`.
+
+This example demonstrates a simple implementation of a method similar to `Array#each`.
+
+
 
 
 
@@ -758,12 +782,33 @@ end
 array = [1, 2, 3, 4, 5]
 
 select(array) { |num| num.odd? }
-
-select(array) { |num| puts num }
-select(array) { |num| num + 1 }
 ```
 
+On line 14, we initialize local variable `array` to the array `[1, 2, 3, 4, 5]`. On line 16, we call the `select` method, passing `array` as argument, with a `{ ... }` block.
 
+The `select` method is defined over lines 1-12 with one parameter `array`, which on this invocation is assigned the `[1, 2, 3, 4, 5]` array.
+
+Within the definition body, we initialize method-local variable `counter` to `0`. We then initialize `result` to an empty array.
+
+On line 5, we enter a `while` loop, which loops while `counter` is less than the size of `array`.
+
+On line 6, we initialize `current_element` to the element of `array` at index `counter`.
+
+On line 7, an `if` statement in modifier form uses the block as a boolean conditional. We `yield` to the block with `current_element` passed as argument. If the object returned by the block is truthy, we push `current_element` to the `result` array; if the object is `false` or `nil`, we do not.
+
+Execution jumps to the block defined on line 16. Block parameter `num` is assigned the integer currently referenced by `current_element`. Within the body of the block, we call `Integer#odd?` on `num`. The boolean return value of `odd?` is the last evaluated expression in the block, and so forms the return value.
+
+Execution returns to the method definition on line 7. The block will return `true` when `current_element` is an odd integer and the integer will be push to `result`; when the integer is even, the block returns `false` and the element is not pushed to `result`.
+
+On line 8, `counter` is incremented.
+
+After the loop, we restate `result` as the implicit return value of `select`.
+
+This invocation of `select` will therefore return the array `[1, 3, 5]`, the odd integers from the array passed as argument.
+
+This example demonstrates a simple implementation of a method similar to `Array#select`. It shows one of the main use cases of blocks for method implementors, to defer part of the implementation to the method user at invocation time, making for flexible, generic, and powerful methods.
+
+9m14s
 
 <u>When You Can Pass a Block to a Method</u>
 
@@ -787,6 +832,18 @@ end
 p increment(2) { |x| x ** 4 }
 ```
 
+On line 5, we call the `increment` method with integer `2` passed as argument and a `{ ... }` block. The return value will be passed to `Kernel#p` to be output to screen.
+
+The `increment` method is defined on lines 1-3 with one parameter `x`, which on this invocation is assigned `2`. Within the body of the method, we add `1` to `x`, returning `3`, and since there is no other code in the method, `increment` returns `3` on this call.
+
+Back on line 5, `3` is passed as argument to `p`, and `3` is output to the screen. `p` returns its argument, `3`.
+
+We have passed a block to a method that does not make use of a block with keyword `yield`. This does not raise an exception because any method in Ruby can accept a block argument even if the definition does not make use of it. If we pass a block to a method, like `increment`, whose implementation does not make use of a block, the method simply ignores it, without raising an exception.
+
+4m59
+
+
+
 
 
 <u>Blocks and Variable Scope</u>
@@ -807,7 +864,25 @@ end
 
 
 
+On line 1, we initialize local variable `level_1` to the string `"outer-most variable".
 
+Next, on line 3, we call the `Array#each` method on the array `[1, 2, 3]` with a `do...end` block that is defined over lines 3-9. The `each` method iterates through the array, `yield`ing each element in turn to the block to be assigned to block parameter `n`.
+
+A block is one way that Ruby implements closures. A closure is a general programming concept that allows programmers to save a "chunk of code" (which we can think of as an anonymous function or method) to be passed around and executed later. A closure binds to the surrounding artifacts (such as local variables) at the point in our program where the closure is defined, "closing over" the surrounding context that the code chunk needs in order to be executed later.
+
+We can think of closures as like anonymous methods, or anonymous functions, but with an environment attached, which in Ruby is called the closure's "binding". 
+
+Within the `each` block, on line 4, we initialize block-local variable `level_2` to the string `"inner variable"`. This variable is local to the block and will not be accessible in the scope where the block is defined. So we could describe the original scope, where `level_1` was initialized, as the "outer scope". In this "inner scope" of the block, however, the "outer scope" local variable `level_1` is accessible, because the block has access to in-scope local variables through its binding. It retains access to `level_1` even though the `each` method has its own scope, and it is the `each` method that actually calls the block. Again, this is because the block, as a closure, has bound the `level_1` variable.
+
+Next, on line 6, we call `each` again with a block, this time on the array `['a', 'b', 'c']`. `each` iterates through this array passing each element to the block to be assigned to the block parameter `n2`.
+
+Within this second "innermost" or "level 3" block, we have access to both `level_1` and `level_2` through the block's binding. Since local variables `level_1` and `level_2` are in scope and initialized when the block is created, the block can bind them for access within this "innermost" block.
+
+When we initialize a block-local variable `level_3`, on line 7, to the string `"inner-most variable"`, this variable is local to the "innermost" block. It cannot be accessed from the outer `each` block or from the original scope.
+
+This example demonstrates how blocks create "inner" scopes where "outer scope" local variables can be accessed but whose block-local variables cannot be accessed from the "outer scope" because blocks are closures that bind in-scope artifacts such as local variables and retain access to them. It is important to note that blocks retain access to the local variables themselves, not only the values that the variables reference.
+
+14m16s
 
 
 
@@ -825,6 +900,20 @@ end
 test { |num| puts num }
 ```
 
+On line 5, we call the `test` method with `{ ... }` block.
+
+The `test` method is defined over lines 1-3. Within the body of the block, we use keyword `yield` to call the given block with the integers `1` and `2` passed as arguments.
+
+Execution jumps to the block defined on line 5, where block parameter `num` is assigned to the first argument passed, `1`. Although we passed a second argument, the block simply ignores it.
+
+The reason this does not raise an `ArgumentError` exception, as a method would if called with too many arguments, is because blocks (and Procs) have "lenient arity" with respect to their arguments. This means that we can pass too many arguments and the block will simply ignore them. If we pass too few arguments, the parameters that have no corresponding argument will simply be assigned `nil`. 
+
+The differing arity of blocks and methods means that methods enforce the count of required parameters in their parameter list with respect to the arguments passed when they are called, and blocks do not.
+
+Within the body of the block, we pass `num` to `Kernel#puts` which outputs `1` to screen and returns `nil`. Since this is the end of the block, the block also returns `nil`.
+
+Execution resumes in the method on line 2. There is no more code in the method definition either, so the method also returns `nil`.
+
 
 
 26. Will the code below raise an error? Why or why not?
@@ -838,6 +927,16 @@ test do |num1, num2|
   puts "#{num1} #{num2}"
 end
 ```
+
+On line 5, we call the `test` method with a `do...end` block.
+
+The `test` method is defined on lines 1-3. Within the body of the definition, we use the `yield` keyword to call the block with integer `1` passed as argument.
+
+Execution jumps to the block defined over lines 5-7 with two block parameters `num1` and `num2`. `num1` is assigned to the argument `1`, while `num2` has no corresponding argument and is therefore assigned `nil`.
+
+The reason no exception is raised is that blocks have lenient arity with respect to their arguments. Unlike a method, which has strict arity, a block will not raise an exception regardless of how many or how few arguments are passed. If the block receives too many arguments for its parameters, the excess arguments are simply ignored. If the block receives too few arguments, any parameters without corresponding arguments are assigned `nil`. Methods have strict arity, meaning they enforce the exact count of arguments with respect to their required parameters.
+
+Within the body of the block, on line 6, we interpolate `num1` and `num2` into a string, `"#{num1} #{num2}"`, and then pass the resulting string to `Kernel#puts`. Since string interpolation calls `to_s` on the objects interpolated, and `NilClass#to_s` returns an empty string, the text output will be `"1 "`.
 
 
 
