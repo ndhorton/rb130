@@ -950,52 +950,21 @@ end
 process_number(7) { |num1, num2| num1 ** num2 }
 ```
 
+On line 5, we call the `process_number` method with integer `7` passed as argument and a `{ ... }` block.
 
+The `process_number` method is defined over lines 1-3 with two parameters. On first glance, it may seem that we have passed too few arguments, in which case the method would raise an `ArgumentError`. However, this is not the case. The first parameter, `num`, is assigned to `7` on this invocation. The second `block` is prefixed with the `&` operator in the parameter list on line 1, signifying that `block` is an explicit block parameter. 
 
-28. Will the code below raise an error? Why, or why not?
+The `&` operator prefixed to a method parameter will convert a given implicit block argument to a Proc object and assign it to the parameter. Thereafter, the Proc can be passed around, returned, and generally treated like any other object. The explicit block parameter itself is just another parameter, which can be reassigned like any other local variable. The explicit block parameter variable is not referenced with a `&` inside the body of the method definition, only in the parameter list.
 
-```ruby
-def process_number(num, &block)
-  block.call(num)
-end
+Within the body of the method definition, on line 2, we call  the `Proc#call` method on `block` with `num` passed as argument.
 
-process_number(7) { |num1, num2| num1 ** 2 }
-```
+Execution jumps to the code defined by the block definition on line 5. There are two block parameters. The first, `num1`, is assigned to the argument passed by the `process_number` method, the integer `7`. The second parameter, `num2`, has no corresponding argument and so it is assigned `nil`.
 
+Blocks, unlike methods, have 'lenient arity'. This means that a block does not enforce the count of arguments suggested by its parameters. If we pass too few arguments, the block parameters without an argument are assigned `nil`. If we pass too many arguments, the excess arguments are simply ignored. Methods have 'strict arity', meaning that methods enforce the number of arguments called for by their required parameters and will raise an `ArgumentError` exception if we pass too few or too many.
 
+Within the body of the block, we attempt to raise `num1` to the power given by `num2` using the `**` operator method. This raises an exception because `num2` has been assigned `nil` and the `Integer#**` method requires a Numeric argument.
 
-29. Will the code below raise an error? Why, or why not?
-
-```ruby
-def transform_number(num, block)
-  block.call(num)
-end
-
-l = lambda { |num1, num2| num1 ** num2 }
-```
-
-
-
-
-
-<u>Arguments and Return Values with Blocks</u>
-
-
-
-28. Describe the flow of execution up to line 7. What will the of `after` on line 3 be for all the calls to `compare`?
-
-```ruby
-def compare(str)
-  puts "Before: #{str}"
-  after = yield(str)
-  puts "After: #{after}"
-end
-
-compare('hello') { |word| word.upcase }
-compare('hello') { |word| word.slice(1..2) }
-compare('hello') { |word| "nothing to do with anything" }
-compare('hello') { |word| puts "hi" }
-```
+This example demonstrates the different arity of blocks compared to methods. It also demonstrates the use of an explicit block parameter that allows us to assign an implicit block argument to a parameter by converting the block (a structure of code) to a Proc (an object).
 
 
 
@@ -1021,6 +990,28 @@ end
 p results # => [0, 1, 3, 6, 10, 15]
 ```
 
+On line 5, we initialize local variable `arr` to an array, `[1, 2, 3, 4, 5]`. On line 6, we initialize local variable `results` to the array `[0]`.
+
+Next, on line 8, we call the `for_each_in` method with `arr` passed as argument, implicitly passing a block defined over lines 8-11.
+
+A block is one of the ways Ruby implements a closure. A closure is a general programming concept that allows programmers to save a "chunk of code" (which we can think of as an anonymous function or method) to be passed around and executed later. A closure binds to the surrounding artifacts (such as local variables) at the point in our program where the closure is defined, "closing over" the surrounding context that the code chunk needs in order to be executed later.
+
+We can think of closures as like anonymous methods, or anonymous functions, but with an environment attached, which in Ruby is called the closure's "binding". A closure will bind the in-scope local variables initialized before the closure is created.
+
+The `for_each_in` method is defined on lines 1-3 with one parameter, `arr`, which on this invocation is assigned the array referenced by the `arr` local variable initialized on line 5, which we passed as argument to the method. The `arr` parameter is a method-local variable and is not the same variable as the one passed as argument, they simply have the same name and on this invocation point to the same object. This is not a case of variable shadowing either, since methods have self-contained scope with respect to local variables.
+
+Within the body of the method definition, on line 2, we call the `Array#each` method on method-local variable `arr` with a `{ ... }` block. The `each` method iterates through each element of `arr`, passing each in turn to the block to be assigned to block parameter `element`. Within the body of the block, we `yield` to the block passed to the `for_each_in` method with `element` passed as argument.
+
+When we use keyword `yield` in the context of the `for_each_in` method, execution jumps to the block defined on lines 8-11, where the current `element` integer is assigned to the block parameter `number`. 
+
+Within the body of the block, we initialize block-local variable `total` to the return value of adding `number` to the element at index `-1` of the `results` array. This is the same local variable initialized on line 6. We are able to access it because the block bound the `results` local  variable when it was created. This is why we are able to mutate the `results` array on line 10, where we `push` block-local variable `total` to the end of the `results` array. Since `results` was initialized in the same scope (top-level) before (line 6) the block was created (line 8), the block can access `results` and the object it references, and we could even reassign the `results` variable to reference a different object if we wished. 
+
+Even though the block is called from the self-contained local variable scope of `for_each_in`, the block on lines 8-11 can access the `results` variable from the scope in which it was created through its binding, even though the `for_each_in` method cannot access the `results` variable.
+
+This is why, when we pass `results` to `Kernel#p` on line 13, after `for_each_in` returns, the output will be `[0, 1, 3, 6, 10, 15]`.
+
+This example demonstrates local variable scope with respect to blocks; specifically, it demonstrates that, as a form of Ruby closure, a block will bind the in-scope local variables that it requires in order to execute, and retains access to those local variables through its binding, even though the block is executed from a different scope (the method scope where `yield` is used).
+
 
 
 32. Will this code raise an error? Why, or why not?
@@ -1037,75 +1028,19 @@ name = "Griffin III"
 call_me(chunk_of_code)
 ```
 
+On line 6, we initialize local variable `chunk_of_code` to a new Proc object, passing a `{ ... }` block to `Proc::new`.
 
+On the next line, line 7, we initialize local variable `name` to the string `"Griffin III"`. Although we are still in the same lexical scope for local variables (top-level), the Proc we just created will not bind to the `name` local variable since it was initialized after the Proc was instantiated.
 
-<u>Create Custom Methods that Use Blocks and Procs</u>
+A Proc is one of the ways Ruby implements a closure. A closure is a general programming concept that allows programmers to save a "chunk of code" (which we can think of as an anonymous function or method) to be passed around and executed later. A closure binds the chunk of code to the surrounding artifacts (such as local variables) at the point in our program where the closure is defined, "closing over" the surrounding context that the code chunk needs in order to be executed later. We can think of closures as like anonymous methods, or anonymous functions, but with an environment attached, which in Ruby is called the closure's "binding".
 
-33. Describe the flow of execution and what is output.
+Closures bind to the local variables in scope at the time and location in the program where the closure is created. A local variable must be initialized before the closure is created for the closure to bind it.
 
-```ruby
-def times(number)
-  counter = 0
-  while counter < number do
-    yield(counter)
-    counter += 1
-  end
+On line 9, we call the `call_me` method, with `chunk_of_code` passed as argument. The `call_me` method is defined on lines 1-3 with one parameter `some_code`, which on this invocation is assigned the `chunk_of_code` Proc. Within the body of the method definition, on line 2, we call `Proc#call` on `some_code`.
 
-  number                     
-end
+Execution jumps to the code defined by the block definition on line 6. We attempt to interpolate `name` into a string. Since we cannot access the `name` local variable from line 7, since it was initialized after the Proc was created, and there is no other `name` variable or method definition in the code example, a `NameError` exception is raised.
 
-times(5) do |num|
-  puts num
-end
-```
-
-
-
-34. Describe the flow of execution and output.
-
-```ruby
-def each(array)
-  counter = 0
-
-  while counter < array.size
-    yield(array[counter])                          
-    counter += 1
-  end
-
-  array  
-end
-
-each([1, 2, 3, 4, 5]) do |num|
-  puts num
-end
-```
-
-
-
-35. Describe the flow of execution and give the return values for lines 16, 17, and 18.
-
-```ruby
-def select(array)
-  counter = 0
-  result = []
-
-  while counter < array.size
-    current_element = array[counter]
-    result << current_element if yield(current_element)
-    counter += 1
-  end
-
-  result
-end
-
-array = [1, 2, 3, 4, 5]
-
-select(array) { |num| num.odd? }
-select(array) { |num| puts num }
-select(array) { |num| num + 1 }
-```
-
-
+This example demonstrates local variable scope with respect to a Proc and its binding; specifically, it demonstrates that a Proc will only bind local variables initialized in-scope before the Proc is created.
 
 
 
@@ -1120,6 +1055,28 @@ end
 
 test { sleep 1 }
 ```
+
+On line 5, we call the `test` method, passing a `{ ... }` block as implicit argument to the method invocation.
+
+The `test` method is defined on lines 1-3 with one parameter `&block`. The `&` prefix denotes that this is an explicit block parameter.
+
+Every method, regardless of its definition, can take an block as an implicit argument, even if the method definition does not make use of it with the `yield` keyword. However, a method can instead take the block as an explicit argument, denoted in the method definition by an `&` prefixed to the last parameter in the parameter list.
+
+The `&` operator prefixed to a method parameter will convert a given implicit block argument to a Proc object and assign the Proc to the parameter. Thereafter, the Proc can be passed around, returned, and generally treated like any other object. The explicit block parameter itself is just another parameter, which can be reassigned like any other local variable. The explicit block parameter variable is not referenced with a `&` inside the body of the method definition, only in the parameter list.
+
+If no block is given when the method is invoked, the explicit block parameter will be assigned `nil`, so we may wish to test for this before invoking Proc methods on it.
+
+The advantages of an explicit block over an implicit block are the advantages of a first-class citizen, an object, which can be passed around to other methods. This is more flexible than the more spectral presence of an implicit block, which can only be interacted with or executed only from within the method to which the block is implicitly passed .
+
+So in this example, the block defined on line 5 and passed implicitly to the `test` method is converted to a Proc object that is assigned to the `block` method-local variable.
+
+Within the body of the method definition, we interpolate `block` into the string `"What's &block? #{block}"` and pass the resulting string to the `Kernel#puts` method, which outputs something similar to
+
+```
+What's &block? #<Proc:0x00007f7eaf02a348 /home/nicholas/launch_school/rb130/scratch.rb:5>
+```
+
+This example demonstrates methods that take an explicit block parameter.
 
 
 
@@ -1141,7 +1098,27 @@ end
 test { |prefix| puts "xyz" }
 ```
 
+On line 13, we call the `test` method with a `{ ... }` block.
 
+The `test` method is defined on lines 7-11 with one parameter `&block`. The `&` prefixed to the name of the parameter denotes that this is an explicit block parameter.
+
+The `&` operator used in this context converts the block passed to the method into a Proc object. Thereafter, the resulting Proc can be passed around like any other object. An implicit block remains accessible only to the method invocation on which it is defined; a block is a code structure rather than an object, a first-class citizen. An explicit block parameter allows us to treat the block as an object, by converting it to a Proc.
+
+An explicit block parameter is referenced within the method body without the `&`. If no block is passed to the method, the explicit block parameter is simply assigned `nil`.
+
+Within the `test` method, we output `"1"` with the `Kernel#puts` method and then call the `test2` method with `block` passed as argument. This is only possible because we have used an explicit block parameter. An implicit block argument cannot be passed forward to another method call (or returned), since it is not an object.
+
+The `test2` method is defined on lines 1-5, with one parameter `block`, which on this invocation is assigned the Proc created by the explicit block parameter of the `test` method. The `block` parameter of the `test2` method is just a simple positional parameter. Since a Proc is an object like any other, we do not need an explicit block parameter to pass it to.
+
+Within the body of the `test2` method, we output the string `"hello"` with the `puts` method on line 8. On the next line, line 9, we call `Proc#call` on `block`.
+
+Execution jumps to the code defined by the block definition on line 13. The Proc parameter is assigned `nil`, since we did not pass an argument to `Proc#call`. Within the body of the Proc, we output the string `"xyz"` with `puts`.
+
+Execution resumes in the `test2` method, where we output `"good-bye"` with `puts` on line 10.
+
+Execution resumes in the `test` method, where on line 10, we output `"2"` with `puts`.
+
+This example demonstrates methods with an explicit block parameter; specifically, it shows that an explicit block parameter allows us to pass the block to another method as a Proc object, which we cannot do with an implicit block.
 
 
 
@@ -1160,6 +1137,34 @@ end
 
 test { |prefix| puts prefix + "xyz" }
 ```
+
+On line 11, we call the `test` method with a `{ ... }` block.
+
+The `test` method is defined on lines 5-9 with one parameter `&block`. The `&` prefix denotes that this is an explicit block parameter.
+
+An implicit block can only be interacted with by the method on whose invocation the block is defined. By using an explicit block parameter, which converts the block passed to the method to a Proc object and assigns the Proc to the parameter, we can pass the closure around to other methods, as we might any other object. The `&` prefix is only used in the parameter list; thereafter in the method body, we reference the parameter without it, like any other method-local variable.
+
+Within the body of the method, we pass the string `"1"` to `Kernel#puts` to be output to screen. On the next line, line 7, we call the `display` method with `block` passed as argument.
+
+The `display` method is defined on lines 1-3 with one parameter `block`, which on this invocation is assigned the Proc object resulting from the explicit block parameter in the `test` method. Since a Proc is an object like any other, we do not need an explicit block parameter with the `&` operator to accept it.
+
+Within the body of the `display` method, on line 2, we call `Proc#call` on `block` passing the string `">>>"` as argument.
+
+Execution jumps to the code defined by the block definition on line 11. The Proc parameter `prefix`  is assigned the string we passed as argument. Within the body of the block, we concatenate `prefix` to the string `"xyz"` and pass the resulting string to the `puts` method to be output. `puts` returns `nil` as it always does, and since there is no more code the block also returns `nil`.
+
+Execution resumes in the `display` method. There is no more code here either, so `display` also returns `nil`, though nothing is done with it.
+
+Back in the `test` method, on line 8, we pass the string `"2"` to `puts` to be output. `puts` returns `nil` and this is the last evaluated expression in the `display` method, so `display` also returns `nil`.
+
+Therefore this code outputs
+
+```
+1
+>>>xyz
+2
+```
+
+This example demonstrates methods with an explicit block parameter; specifically, it shows that an explicit block parameter allows us to pass the block to another method as a Proc object. Passing an implicit block in this fashion is impossible, so for some use cases an explicit block parameter is necessary.
 
 
 
