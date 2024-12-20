@@ -74,12 +74,15 @@ class SumOfMultiples
 
   def to(number)
     multiples = {}
+
     factors.each do |factor|
       multiple = factor
+
       while multiple < number
         multiples[multiple] = true
         multiple += factor
       end
+
     end
     multiples.keys.sum
   end

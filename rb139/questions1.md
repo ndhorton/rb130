@@ -1182,7 +1182,39 @@ end
 [1, 2, 3, 4, 5].map(&:to_s)
 ```
 
+The two calls to `map`, on line lines 1-3, and then on line 5, are functionally equivalent. This is because of the use of the `&` operator on line 5.
 
+The first call to `Array#map` on line 1 with a `do...end` block defined on lines 1-3 transforms the array `[1, 2, 3, 4, 5]` by passing each element to the block parameter `num` and using each block return value as the corresponding element in the new array that `map` returns. Within the body of the block, on line 2, we simply call the `Integer#to_s` method on `num`, returning a string representation of the integer. Since this is the last expression in the block, it forms the block return value, which forms the element at that position in the transformed array.
+
+On line 5, we again call `map` on an array with the same contents as the first. This time, instead of defining a block ourselves, we simply prefix the unary `&` operator to the Symbol `:to_s`.
+
+When used in the context of an argument to a method, the `&` operator functions as a Proc-to-block conversion operator. Implicitly, the `&` operator calls `to_proc` on its operand. When the operand is a Proc object, `Proc#to_proc` simply returns the caller. Ruby then converts the Proc object to a block argument which is passed to the method invocation. This is useful when we need to pass an existing Proc to a method that expects a block.
+
+When the `&` operand is a `Symbol`, Ruby implicitly calls `Symbol#to_proc`, and then converts the resulting Proc object to a block. `Symbol#to_proc` expects the Symbol in question to be the name of a method, as here on line 5 we name the `to_s` method. `Symbol#to_proc` returns a Proc which has the form:
+
+```ruby
+do |obj|
+  obj.named_method
+end
+```
+
+We can see that this is the same format as the block defined on lines 1-3
+
+```ruby
+do |num|
+  num.to_s
+end
+```
+
+Ruby then converts the Proc returned by `Symbol#to_proc` to a block and passes it to the method invocation, as it would a block we have defined ourselves.
+
+So the `map` call on line 1, and the `map` call on line 5, are equivalent, and both return a new array whose contents are `["1", "2", "3", "4", "5"]`.
+
+The advantages of `Symbol#to_proc` and the `&` operator are largely stylistic: concision, readability, immediate clarity of intent. It can  when chaining method calls.
+
+This example demonstrates using the `&` operator and `Symbol#to_proc` as shorthand syntax for an equivalent block definition.
+
+18m15s 
 
 40. Describe the method calls and return values in the code sample below.
 
@@ -1190,19 +1222,65 @@ end
 [1, 2, 3, 4, 5].map(&:to_s).map(&:to_i)
 ```
 
+On line 1, we call `Array#map` on the array `[1, 2, 3, 4, 5]` with `&:to_s` passed as argument. The `&` operator in this context converts a Proc object to a block to be passed to the method invocation like any other block.
+
+First, the `&` operator calls `to_proc` on its operand. If the operand is already a Proc, `Proc#to_proc` simply returns the caller. When the operand is a Symbol, `&` implicitly calls `Symbol#to_proc`.
+
+`Symbol#to_proc` is designed to assume that the Symbol it is called on is the name of a method. So if, for instance, `to_proc` is called on the symbol `:to_s`, it will return a Proc whose code would be equivalent to:
+
+```
+ { |object| object.to_s }
+```
+
+The unary `&` operator then converts this Proc object to a block to be implicitly passed to the method call.
+
+This technique is only useful for certain kinds of methods. The Proc produced by `Symbol#to_proc` will always take the form given above. Consequently, this technique is not useful for methods that require us to pass arguments.
+
+This invocation of `map` therefore iterates through the calling array passing each integer element in turn to the block that `&` created from the `:to_s` symbol; in the block, the `Integer#to_s` method is called on the current element, forming the block return value. `map` uses this to return a new array containing the string representations of the elements in the caller: `["1", "2", "3", "4", "5"]`.
+
+Chained on this return value is another call to `Array#map` with `(&:to_i)` passed as argument. Again, the `&` operator calls `Symbol#to_proc`, this time on the `:to_i` Symbol, returning a Proc that `&` converts to a block to be passed to the `map` method. `map` therefore returns a new array with all the strings from the caller converted to integer representations: `[1, 2, 3, 4, 5]`.
+
+So the new array returned by the entire method chain has the same elements as the initial array caller.
+
+This example demonstrates using the `&` operator to construct a block from a Symbol that names a method with no arguments. This can be a very useful shorthand, which is more readable and clearer in intent than writing the block definition; it is useful when we wish an iterator method to call the same no-argument method on every element in a collection.
+
+9m55s
+
 
 
 41. Describe the method calls and return values in the code sample below.
 
 ```ruby
-["hello", "world"].each(&:upcase!)          
-[1, 2, 3, 4, 5].select(&:odd?)              
 [1, 2, 3, 4, 5].select(&:odd?).any?(&:even?)
 ```
 
+On line 1, we call the `Array#select` method on the array literal `[1, 2, 3, 4, 5]` with `&:odd?` passed as argument. When the unary `&` operator is used in the argument list of a method invocation, its function is to convert its operand to a block to be passed to the method call like any other block.
 
+For Proc objects this is straightforward. However, we can also prefix `&` to a Symbol argument, and the `&` operator will call the `Symbol#to_proc` method.
 
-42. What is the meaning of the `&` operator on line 6?
+`Symbol#to_proc` assumes that the Symbol it is called on is the name of a method. So if, as in this example, `to_proc` is called on the symbol `:odd?`, it will return a Proc whose code would be equivalent to:
+
+```ruby
+ { |object| object.odd? }
+```
+
+The unary `&` operator then converts this Proc object to a block to be implicitly passed to the method call.
+
+Therefore, this call to `select` returns a new array based on the selection criteria of calling `Integer#odd?` on each element of the calling array: `[1, 3, 5]`.
+
+Chained on this return value is a call to `Array#any?` with `&:even?` passed as argument. We are again using the `&` unary operator, this time to derive a Proc object by calling `Symbol#to_proc` on `:even?` that is then converted to a block to pass to the `any?` method. The block's code would be equivalent to:
+
+```ruby
+{ |object| object.even? }
+```
+
+Since there are no even numbers in the calling array, the return value will be an empty array: `[]`.
+
+Since the code generated by `Symbol#to_proc` always takes the basic form above, it is only useful for methods that do not require arguments, such as `odd?` and `even?`. However, for methods such as these, it is often clearer, more readable and less verbose than writing the block ourselves.
+
+This example demonstrates using the unary `&` operator with a Symbol operand to generate a Proc that is converted to a block to pass to an iterator method that expects a block.
+
+42. What is the meaning of the `&` operator on line 5?
 
 ```ruby
 def my_method
@@ -1211,6 +1289,32 @@ end
 
 my_method(&:to_s)
 ```
+
+
+
+On line 5 we call `my_method` with `&:to_s` passed as argument. The unary `&` operator in this context functions to convert its operand to a block to be passed to the method invocation like any other block.
+
+For Proc objects this is straightforward. However, we can also prefix `&` to a Symbol argument, and the `&` operator will implicitly call the `Symbol#to_proc` method in order to receive a Proc object that can be converted to a block.
+
+`Symbol#to_proc` assumes that the Symbol it is called on is the name of a method that does not require arguments. So if, as here, `to_proc` is called on the symbol `:to_s`, it will return a Proc whose code would be equivalent to:
+
+```ruby
+ { |object| object.to_s }
+```
+
+The unary `&` operator then converts this Proc object to a block to be implicitly passed to the method call.
+
+This technique is only useful for certain kinds of methods. The Proc produced by `Symbol#to_proc` will always take the form given above. Consequently, this technique is not useful for Symbols that name methods that require us to pass arguments. However, it is useful shorthand syntax.
+
+The `my_method` method is defined on lines 1-3 with no parameters. Within the body of the method, on line 2, we `yield` to the block, which on this invocation is the block we derived from `:to_s` with the `&` operator, and pass the integer `2` to the block as argument.
+
+Execution jumps to the block, where `to_s` is called on `2`. The return value of the block is thus `"2"`.
+
+Execution resumes in the method definition. Since there is no more code, the method also returns `"2"`.
+
+This example demonstrates the use of the unary `&` operator to convert a Symbol that names a method to a Proc object and then a block to be passed to a method invocation.
+
+
 
 
 
@@ -1225,7 +1329,27 @@ a_proc = :to_s.to_proc
 my_method(&a_proc)
 ```
 
+On line 5, we initialize local variable `a_proc` to the return value of calling the `Symbol#to_proc` method on `:to_s`.
 
+`Symbol#to_proc` assumes that the Symbol it is called on is the name of a method that does not require arguments. So if, for instance, `to_proc` is called on the symbol `:to_s`, it will return a Proc whose code would be equivalent to:
+
+```ruby
+ { |object| object.to_s }
+```
+
+This is only useful for certain kinds of methods. The Proc produced by `Symbol#to_proc` will always take the form given above. Consequently, this technique is not useful for Symbols that name methods that require us to pass arguments. However, it can be very useful shorthand.
+
+On line 6, we call the `my_method` method with `&a_proc` passed as argument. The unary `&` operator in the context of an argument list to a method invocation functions to convert its operand to a block to be passed to the method like an ordinary block definition.
+
+When the operand is a Proc object, this process is simple and Ruby converts the `a_proc` Proc object to a block to be passed to `my_method`.
+
+`my_method` is defined on lines 1-3 with no parameters. Within the body of the method definition, we `yield` to the block we derived ultimately from the Symbol `:to_s` on lines 5-6, with the integer `2` passed as argument.
+
+Execution jumps to the block, where `Integer#to_s` is called on `2`, and the returned string `"2"` forms the block's return value.
+
+Execution resumes in the `my_method` method, where there are no further expression, and so `"2"` is also the return value of the method.
+
+This example demonstrates using `Symbol#to_proc` and the `&` unary operator to generate first a Proc object and then a block from a Symbol that names a method.
 
 
 
@@ -1252,4 +1376,30 @@ p s2.call           # 1
 p s1.call           # 4 (note: this is s1)
 p s2.call           # 2
 ```
+
+On line 6, we initialize local variable `s1` to the return value of calling the `sequence` method.
+
+The `sequence` method is defined on lines 1-4. Within the body of the method definition, on line 2, we initialize method-local variable `counter` to integer `0`.
+
+It is important to note that each time a method is invoked, the method-local variables, including any parameters, are newly created variables that are unique to that method call. This is to say that each call to a method has its own set of method-local variables, though their names are always the same as defined by the method definition.
+
+On line 3, we invoke the `Proc::new` method with the block `{ counter += 1 }` passed as argument to form the new Proc object's code chunk.
+
+A Proc is one of the ways that Ruby implements a closure. A closure is a general programming concept that allows programmers to save a "chunk of code" (which we can think of as an anonymous function or method) to be passed around and executed later. A closure binds the chunk of code to the surrounding artifacts (such as local variables) at the point in our program where the closure is defined, "closing over" the surrounding context that the code chunk needs in order to be executed later. We can think of closures as like anonymous methods, or anonymous functions, but with an environment attached, which in Ruby is called the closure's "binding".
+
+When a local variable is bound by a closure, it is the variable itself that the closure can access, not simply the object that the variable references. So the newly-created Proc object binds the `counter` method-local variable we just initialized and retains access to it, even if the Proc is passed to another scope. 
+
+Unlike a block, a Proc is an object and can be passed around from method to method and from scope to scope. And since there are no further expressions in the `sequence` method definition, the newly-created Proc forms the return value of `sequence`. This is significant because this Proc will continue to have access to this particular `counter` local variable even after this particular call to `sequence` returns, meaning that the Proc now has exclusive access to this `counter` variable through its binding. The Proc is also extending the lifetime of the variable by keeping a reference to it even though its original local scope no longer exists.
+
+On line 7, we call `Proc#call` on the `s1` Proc object. Execution jumps to the Proc's code, defined by the block definition on line 3. We increment `counter` to `1` and this forms the return value of `Proc#call`. This is then passed to `Kernel#p` to be output.
+
+Lines 8 and 9, repeat this. Each time, the Proc increments `counter` and returns its new value. Since the Proc retains access to the variable through its binding, the variable continues to reference the same integer, until `Proc#call` is called on the Proc again and the variable is reassigned to the next number.
+
+On line 12, we initialize local variable `s2` to the return value of another call to `sequence`. This call to `sequence` has its own new and distinct `counter` method-local variable, which is captured by the binding of the new Proc object that the method returns.
+
+So the Proc referenced by `s2` will have its own distinct counter variable. We can see this from the output from `p` on line 13, when we pass it the return value of calling `Proc#call` on `s2`, which is `1`. When we call `Proc#call` on `s1` on the next line, the return value is `4`. The two Proc objects are able to iterate through their own distinct sequences, separately from each other. When we call `call` on `s2` on the final line, the return value is still only `2`.
+
+This example demonstrates that Ruby methods can return closure objects, such as Procs or lambdas. It also shows that each call to a method results in new method-local variables, which can be captured and potentially kept alive by a new closure object's binding.
+
+
 
